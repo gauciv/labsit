@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using LaboratorySitInSystem.DataAccess;
 using LaboratorySitInSystem.Helpers;
 
@@ -77,22 +78,58 @@ namespace LaboratorySitInSystem.ViewModels
         {
             ErrorMessage = string.Empty;
 
-            var admin = _adminRepo.Authenticate(Username, Password);
-            if (admin != null)
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                // Navigate to AdminDashboardViewModel (will be created in task 7.1)
-                // MainViewModel.Instance.NavigateTo(new AdminDashboardViewModel(...));
+                ErrorMessage = "Please enter both username and password.";
+                return;
             }
-            else
+
+            try
             {
-                ErrorMessage = "Invalid username or password";
+                var admin = _adminRepo.Authenticate(Username, Password);
+                if (admin != null)
+                {
+                    var studentRepo = new StudentRepository();
+                    var sessionRepo = new SessionRepository();
+                    var scheduleRepo = new ScheduleRepository();
+                    var settingsRepo = new SettingsRepository();
+
+                    MainViewModel.Instance.NavigateTo(new AdminDashboardViewModel(
+                        studentRepo, sessionRepo, scheduleRepo, settingsRepo, _adminRepo));
+                }
+                else
+                {
+                    ErrorMessage = "Invalid username or password.";
+                }
+            }
+            catch (MySql.Data.MySqlClient.MySqlException ex)
+            {
+                ErrorMessage = $"Database connection failed. Is XAMPP MySQL running?\n\nDetails: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"[LOGIN ERROR] MySqlException: {ex}");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"An unexpected error occurred: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"[LOGIN ERROR] Exception: {ex}");
             }
         }
 
         private void ExecuteGoToStudentSitIn(object parameter)
         {
-            // Navigate to StudentSitInViewModel (will be created in task 6.1)
-            // MainViewModel.Instance.NavigateTo(new StudentSitInViewModel(...));
+            try
+            {
+                var studentRepo = new StudentRepository();
+                var scheduleRepo = new ScheduleRepository();
+                var sessionRepo = new SessionRepository();
+
+                MainViewModel.Instance.NavigateTo(new StudentSitInViewModel(
+                    studentRepo, scheduleRepo, sessionRepo));
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to navigate: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"[NAV ERROR] Exception: {ex}");
+            }
         }
 
         private void ExecuteResetPassword(object parameter)

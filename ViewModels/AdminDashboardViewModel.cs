@@ -68,8 +68,15 @@ namespace LaboratorySitInSystem.ViewModels
 
         public void RefreshDashboard()
         {
-            TotalStudents = _studentRepo.GetAll().Count;
-            ActiveSessionCount = _sessionRepo.GetActiveSessionCount();
+            try
+            {
+                TotalStudents = _studentRepo.GetAll().Count;
+                ActiveSessionCount = _sessionRepo.GetActiveSessionCount();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD ERROR] Failed to refresh: {ex}");
+            }
         }
 
         private void ExecuteGoToStudentManagement(object parameter)

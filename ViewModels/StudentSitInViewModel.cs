@@ -62,39 +62,58 @@ namespace LaboratorySitInSystem.ViewModels
             CurrentStudent = null;
             MatchedSchedule = null;
 
-            var student = _studentRepo.GetById(StudentIdInput);
-            if (student == null)
+            if (string.IsNullOrWhiteSpace(StudentIdInput))
             {
-                StatusMessage = "Student not found";
+                StatusMessage = "Please enter a Student ID.";
                 return;
             }
 
-            CurrentStudent = student;
-
-            var activeSession = _sessionRepo.GetActiveSessionByStudent(StudentIdInput);
-            if (activeSession != null)
+            try
             {
-                StatusMessage = "Student already has an active session";
-                return;
+                var student = _studentRepo.GetById(StudentIdInput);
+                if (student == null)
+                {
+                    StatusMessage = "Student not found.";
+                    return;
+                }
+
+                CurrentStudent = student;
+
+                var activeSession = _sessionRepo.GetActiveSessionByStudent(StudentIdInput);
+                if (activeSession != null)
+                {
+                    StatusMessage = "Student already has an active session.";
+                    return;
+                }
+
+                var now = DateTime.Now;
+                var schedule = _scheduleRepo.GetActiveSchedule(StudentIdInput, now.DayOfWeek, now.TimeOfDay);
+                MatchedSchedule = schedule;
+
+                var session = new SitInSession
+                {
+                    StudentId = StudentIdInput,
+                    StudentName = student.FullName,
+                    SubjectName = schedule?.SubjectName,
+                    StartTime = now,
+                    IsScheduled = schedule != null
+                };
+
+                _sessionRepo.StartSession(session);
+
+                var subjectDisplay = schedule != null ? schedule.SubjectName : "Walk-in";
+                StatusMessage = $"Welcome, {student.FullName}! Session started at {now:hh:mm tt} — {subjectDisplay}";
             }
-
-            var now = DateTime.Now;
-            var schedule = _scheduleRepo.GetActiveSchedule(StudentIdInput, now.DayOfWeek, now.TimeOfDay);
-            MatchedSchedule = schedule;
-
-            var session = new SitInSession
+            catch (MySql.Data.MySqlClient.MySqlException ex)
             {
-                StudentId = StudentIdInput,
-                StudentName = student.FullName,
-                SubjectName = schedule?.SubjectName,
-                StartTime = now,
-                IsScheduled = schedule != null
-            };
-
-            _sessionRepo.StartSession(session);
-
-            var subjectDisplay = schedule != null ? schedule.SubjectName : "Walk-in";
-            StatusMessage = $"Welcome, {student.FullName}! Session started at {now:hh:mm tt} — {subjectDisplay}";
+                StatusMessage = $"Database connection failed. Is XAMPP MySQL running?\n\nDetails: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"[SITIN ERROR] MySqlException: {ex}");
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"An unexpected error occurred: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"[SITIN ERROR] Exception: {ex}");
+            }
         }
 
         private void ExecuteGoBack(object parameter)

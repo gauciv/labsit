@@ -1,3 +1,4 @@
+using System;
 using System.Configuration;
 using System.Windows;
 using LaboratorySitInSystem.DataAccess;
@@ -10,6 +11,18 @@ namespace LaboratorySitInSystem
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Global exception handler — prevents silent crashes
+            DispatcherUnhandledException += (s, args) =>
+            {
+                System.Diagnostics.Debug.WriteLine($"[UNHANDLED ERROR] {args.Exception}");
+                MessageBox.Show(
+                    $"An error occurred:\n\n{args.Exception.Message}\n\nCheck the Output window in Visual Studio for full details.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                args.Handled = true;
+            };
 
             string connectionString =
                 ConfigurationManager.ConnectionStrings["DefaultConnection"]?.ConnectionString
