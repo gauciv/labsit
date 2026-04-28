@@ -1,0 +1,54 @@
+<UserControl x:Class="LaboratorySitInSystem.Views.AdminDashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Sidebar -->
+        <Border Grid.Column="0" Background="#2D2D30" Padding="10">
+            <StackPanel>
+                <TextBlock Text="Admin Panel" FontSize="18" FontWeight="Bold" Foreground="White"
+                           Margin="0,0,0,20" HorizontalAlignment="Center"/>
+
+                <!-- Summary -->
+                <Border Background="#3E3E42" CornerRadius="4" Padding="8" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Foreground="LightGray" FontSize="11" Text="Total Students"/>
+                        <TextBlock Foreground="White" FontSize="18" FontWeight="Bold"
+                                   Text="{Binding TotalStudents}"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#3E3E42" CornerRadius="4" Padding="8" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Foreground="LightGray" FontSize="11" Text="Active Sessions"/>
+                        <TextBlock Foreground="White" FontSize="18" FontWeight="Bold"
+                                   Text="{Binding ActiveSessionCount}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Navigation Buttons -->
+                <Button Content="Students" Command="{Binding GoToStudentManagementCommand}"
+                        Margin="0,0,0,4" Padding="8,6"/>
+                <Button Content="Schedules" Command="{Binding GoToScheduleManagementCommand}"
+                        Margin="0,0,0,4" Padding="8,6"/>
+                <Button Content="Active Sessions" Command="{Binding GoToActiveSessionsCommand}"
+                        Margin="0,0,0,4" Padding="8,6"/>
+                <Button Content="History" Command="{Binding GoToSitInHistoryCommand}"
+                        Margin="0,0,0,4" Padding="8,6"/>
+                <Button Content="Settings" Command="{Binding GoToSettingsCommand}"
+                        Margin="0,0,0,4" Padding="8,6"/>
+                <Button Content="About" Command="{Binding GoToAboutCommand}"
+                        Margin="0,0,0,20" Padding="8,6"/>
+
+                <Button Content="Logout" Command="{Binding LogoutCommand}"
+                        Padding="8,6" Background="#C62828" Foreground="White"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Right Content Area -->
+        <ContentControl Grid.Column="1" Content="{Binding CurrentSubView}" Margin="10"/>
+    </Grid>
+</UserControl>

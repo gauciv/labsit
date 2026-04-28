@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="xunit" Version="2.7.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.7">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="MySql.Data" Version="8.4.0" />
+  </ItemGroup>
+
+  <!-- Link source files for interfaces and models to avoid WPF project dependency -->
+  <ItemGroup>
+    <Compile Include="..\Models\Student.cs" Link="Models\Student.cs" />
+    <Compile Include="..\Models\ClassSchedule.cs" Link="Models\ClassSchedule.cs" />
+    <Compile Include="..\Models\SitInSession.cs" Link="Models\SitInSession.cs" />
+    <Compile Include="..\DataAccess\IStudentRepository.cs" Link="DataAccess\IStudentRepository.cs" />
+    <Compile Include="..\DataAccess\IScheduleRepository.cs" Link="DataAccess\IScheduleRepository.cs" />
+    <Compile Include="..\DataAccess\ISessionRepository.cs" Link="DataAccess\ISessionRepository.cs" />
+    <Compile Include="..\ViewModels\ViewModelBase.cs" Link="ViewModels\ViewModelBase.cs" />
+    <Compile Include="..\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
+    <Compile Include="..\ViewModels\LoginViewModel.cs" Link="ViewModels\LoginViewModel.cs" />
+    <Compile Include="..\DataAccess\IAdminRepository.cs" Link="DataAccess\IAdminRepository.cs" />
+    <Compile Include="..\Models\AdminUser.cs" Link="Models\AdminUser.cs" />
+    <Compile Include="..\ViewModels\StudentSitInViewModel.cs" Link="ViewModels\StudentSitInViewModel.cs" />
+    <Compile Include="..\DataAccess\AdminRepository.cs" Link="DataAccess\AdminRepository.cs" />
+    <Compile Include="..\DataAccess\DatabaseHelper.cs" Link="DataAccess\DatabaseHelper.cs" />
+    <Compile Include="..\DataAccess\ISettingsRepository.cs" Link="DataAccess\ISettingsRepository.cs" />
+    <Compile Include="..\Models\SystemSettings.cs" Link="Models\SystemSettings.cs" />
+    <Compile Include="..\ViewModels\AdminDashboardViewModel.cs" Link="ViewModels\AdminDashboardViewModel.cs" />
+    <Compile Include="..\ViewModels\StudentManagementViewModel.cs" Link="ViewModels\StudentManagementViewModel.cs" />
+    <Compile Include="..\ViewModels\ScheduleManagementViewModel.cs" Link="ViewModels\ScheduleManagementViewModel.cs" />
+    <Compile Include="..\ViewModels\ActiveSessionsViewModel.cs" Link="ViewModels\ActiveSessionsViewModel.cs" />
+    <Compile Include="..\ViewModels\SitInHistoryViewModel.cs" Link="ViewModels\SitInHistoryViewModel.cs" />
+    <Compile Include="..\ViewModels\SettingsViewModel.cs" Link="ViewModels\SettingsViewModel.cs" />
+    <Compile Include="..\ViewModels\AboutViewModel.cs" Link="ViewModels\AboutViewModel.cs" />
+  </ItemGroup>
+
+</Project>

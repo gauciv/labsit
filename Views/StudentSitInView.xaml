@@ -1,0 +1,41 @@
+<UserControl x:Class="LaboratorySitInSystem.Views.StudentSitInView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="400">
+        <StackPanel>
+            <TextBlock Text="Student Sit-In" FontSize="22" FontWeight="Bold"
+                       HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+            <TextBlock Text="Student ID" Margin="0,0,0,4"/>
+            <TextBox Text="{Binding StudentIdInput, UpdateSourceTrigger=PropertyChanged}" Padding="4" Margin="0,0,0,10"/>
+
+            <Button Content="Login / Start Session" Command="{Binding LoginCommand}" Padding="8,4" Margin="0,0,0,10"/>
+
+            <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" Margin="0,0,0,10" FontSize="14"/>
+
+            <!-- Matched Schedule Info -->
+            <StackPanel Visibility="{Binding MatchedSchedule, Converter={StaticResource NullToCollapsed}}" Margin="0,0,0,10">
+                <TextBlock Text="Matched Schedule:" FontWeight="SemiBold"/>
+                <TextBlock>
+                    <Run Text="Subject: "/><Run Text="{Binding MatchedSchedule.SubjectName, Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock>
+                    <Run Text="Day: "/><Run Text="{Binding MatchedSchedule.DayOfWeek, Mode=OneWay}"/>
+                </TextBlock>
+            </StackPanel>
+
+            <!-- Student Info -->
+            <StackPanel Visibility="{Binding CurrentStudent, Converter={StaticResource NullToCollapsed}}" Margin="0,0,0,10">
+                <TextBlock Text="Student Info:" FontWeight="SemiBold"/>
+                <TextBlock>
+                    <Run Text="Name: "/><Run Text="{Binding CurrentStudent.FullName, Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock>
+                    <Run Text="Course: "/><Run Text="{Binding CurrentStudent.Course, Mode=OneWay}"/>
+                </TextBlock>
+            </StackPanel>
+
+            <Button Content="Back to Login" Command="{Binding GoBackCommand}" Padding="8,4" Margin="0,10,0,0"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

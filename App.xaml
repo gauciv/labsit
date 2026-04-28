@@ -1,0 +1,43 @@
+<Application x:Class="LaboratorySitInSystem.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:helpers="clr-namespace:LaboratorySitInSystem.Helpers"
+             xmlns:vm="clr-namespace:LaboratorySitInSystem.ViewModels"
+             xmlns:views="clr-namespace:LaboratorySitInSystem.Views"
+             >
+    <Application.Resources>
+        <!-- Value Converters -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+        <helpers:NullToCollapsedConverter x:Key="NullToCollapsed"/>
+
+        <!-- ViewModel to View DataTemplates -->
+        <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+            <views:LoginView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StudentSitInViewModel}">
+            <views:StudentSitInView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AdminDashboardViewModel}">
+            <views:AdminDashboardView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StudentManagementViewModel}">
+            <views:StudentManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ScheduleManagementViewModel}">
+            <views:ScheduleManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ActiveSessionsViewModel}">
+            <views:ActiveSessionsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SitInHistoryViewModel}">
+            <views:SitInHistoryView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <views:SettingsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AboutViewModel}">
+            <views:AboutView/>
+        </DataTemplate>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,53 @@
+<UserControl x:Class="LaboratorySitInSystem.Views.LoginView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="350">
+        <StackPanel>
+            <TextBlock Text="Laboratory Sit-In System" FontSize="22" FontWeight="Bold"
+                       HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+            <!-- Login Panel -->
+            <StackPanel Visibility="{Binding IsResetMode, Converter={StaticResource InverseBoolToVisibility}}">
+                <TextBlock Text="Admin Login" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                <TextBlock Text="Username" Margin="0,0,0,4"/>
+                <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" Padding="4"/>
+
+                <TextBlock Text="Password" Margin="0,0,0,4"/>
+                <!-- Using TextBox for simplicity; use PasswordBox with attached behavior in production -->
+                <TextBox Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" Padding="4"/>
+
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" Margin="0,0,0,10"
+                           TextWrapping="Wrap"/>
+
+                <Button Content="Login" Command="{Binding LoginCommand}" Padding="8,4" Margin="0,0,0,8"/>
+                <Button Content="Student Sit-In" Command="{Binding GoToStudentSitInCommand}" Padding="8,4" Margin="0,0,0,8"/>
+                <Button Content="Reset Password" Command="{Binding ToggleResetModeCommand}"
+                        Background="Transparent" BorderBrush="Transparent" Foreground="Blue"
+                        Cursor="Hand" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- Reset Password Panel -->
+            <StackPanel Visibility="{Binding IsResetMode, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="Reset Password" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                <TextBlock Text="Username" Margin="0,0,0,4"/>
+                <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" Padding="4"/>
+
+                <TextBlock Text="New Password" Margin="0,0,0,4"/>
+                <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" Padding="4"/>
+
+                <TextBlock Text="Confirm Password" Margin="0,0,0,4"/>
+                <TextBox Text="{Binding ConfirmPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" Padding="4"/>
+
+                <TextBlock Text="{Binding ResetMessage}" Foreground="OrangeRed" Margin="0,0,0,10"
+                           TextWrapping="Wrap"/>
+
+                <Button Content="Reset Password" Command="{Binding ResetPasswordCommand}" Padding="8,4" Margin="0,0,0,8"/>
+                <Button Content="Back to Login" Command="{Binding ToggleResetModeCommand}"
+                        Background="Transparent" BorderBrush="Transparent" Foreground="Blue"
+                        Cursor="Hand" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
