@@ -39,5 +39,8 @@
         <DataTemplate DataType="{x:Type vm:AboutViewModel}">
             <views:AboutView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StudentSessionDashboardViewModel}">
+            <views:StudentSessionDashboardView/>
+        </DataTemplate>
     </Application.Resources>
 </Application>

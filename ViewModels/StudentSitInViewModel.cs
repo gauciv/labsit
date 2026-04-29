@@ -101,8 +101,12 @@ namespace LaboratorySitInSystem.ViewModels
 
                 _sessionRepo.StartSession(session);
 
-                var subjectDisplay = schedule != null ? schedule.SubjectName : "Walk-in";
-                StatusMessage = $"Welcome, {student.FullName}! Session started at {now:hh:mm tt} — {subjectDisplay}";
+                // Fetch the session back to get the auto-generated SessionId
+                var startedSession = _sessionRepo.GetActiveSessionByStudent(StudentIdInput);
+
+                // Navigate to the session dashboard
+                MainViewModel.Instance.NavigateTo(new StudentSessionDashboardViewModel(
+                    student, startedSession, schedule, _sessionRepo, _scheduleRepo, _studentRepo));
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
             {

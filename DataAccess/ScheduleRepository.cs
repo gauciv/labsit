@@ -113,5 +113,25 @@ namespace LaboratorySitInSystem.DataAccess
                 EndTime = reader.GetTimeSpan("end_time")
             };
         }
+
+        public List<ClassSchedule> GetTodaySchedules(string studentId, DayOfWeek today)
+        {
+            var schedules = new List<ClassSchedule>();
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "SELECT schedule_id, student_id, subject_name, day_of_week, start_time, end_time " +
+                "FROM class_schedules WHERE student_id = @studentId AND day_of_week = @day " +
+                "ORDER BY start_time ASC",
+                connection);
+            command.Parameters.AddWithValue("@studentId", studentId);
+            command.Parameters.AddWithValue("@day", (int)today);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                schedules.Add(ReadSchedule(reader));
+            }
+            return schedules;
+        }
     }
 }

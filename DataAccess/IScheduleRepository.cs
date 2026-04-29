@@ -12,5 +12,6 @@ namespace LaboratorySitInSystem.DataAccess
         void Update(ClassSchedule schedule);
         void Delete(int scheduleId);
         bool HasOverlap(string studentId, DayOfWeek day, TimeSpan start, TimeSpan end, int? excludeId = null);
+        List<ClassSchedule> GetTodaySchedules(string studentId, DayOfWeek today);
     }
 }

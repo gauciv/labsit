@@ -14,7 +14,7 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
             using var command = new MySqlCommand(
                 "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                "s.subject_name, s.start_time, s.end_time, s.is_scheduled " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
                 "FROM sitin_sessions s " +
                 "JOIN students st ON s.student_id = st.student_id " +
                 "WHERE s.end_time IS NULL",
@@ -33,7 +33,7 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
             using var command = new MySqlCommand(
                 "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                "s.subject_name, s.start_time, s.end_time, s.is_scheduled " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
                 "FROM sitin_sessions s " +
                 "JOIN students st ON s.student_id = st.student_id " +
                 "WHERE s.end_time IS NULL AND s.student_id = @studentId",
@@ -50,7 +50,7 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
 
             var sql = "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                      "s.subject_name, s.start_time, s.end_time, s.is_scheduled " +
+                      "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
                       "FROM sitin_sessions s " +
                       "JOIN students st ON s.student_id = st.student_id " +
                       "WHERE 1=1";
@@ -127,6 +127,52 @@ namespace LaboratorySitInSystem.DataAccess
             return Convert.ToInt32(command.ExecuteScalar());
         }
 
+        public int GetStudentSitInCount(string studentId)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "SELECT COUNT(*) FROM sitin_sessions WHERE student_id = @studentId",
+                connection);
+            command.Parameters.AddWithValue("@studentId", studentId);
+            return Convert.ToInt32(command.ExecuteScalar());
+        }
+
+        public List<SitInSession> GetStudentRecentHistory(string studentId, int limit)
+        {
+            var sessions = new List<SitInSession>();
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
+                "FROM sitin_sessions s " +
+                "JOIN students st ON s.student_id = st.student_id " +
+                "WHERE s.student_id = @studentId " +
+                "ORDER BY s.start_time DESC LIMIT @limit",
+                connection);
+            command.Parameters.AddWithValue("@studentId", studentId);
+            command.Parameters.AddWithValue("@limit", limit);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                sessions.Add(ReadSession(reader));
+            }
+            return sessions;
+        }
+
+        public void EndSessionEarly(int sessionId, DateTime endTime)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "UPDATE sitin_sessions SET end_time = @endTime, early_ended = TRUE WHERE session_id = @sessionId",
+                connection);
+            command.Parameters.AddWithValue("@endTime", endTime);
+            command.Parameters.AddWithValue("@sessionId", sessionId);
+            command.ExecuteNonQuery();
+        }
+
         private static SitInSession ReadSession(MySqlDataReader reader)
         {
             return new SitInSession
@@ -137,7 +183,8 @@ namespace LaboratorySitInSystem.DataAccess
                 SubjectName = reader.IsDBNull(reader.GetOrdinal("subject_name")) ? null : reader.GetString("subject_name"),
                 StartTime = reader.GetDateTime("start_time"),
                 EndTime = reader.IsDBNull(reader.GetOrdinal("end_time")) ? null : reader.GetDateTime("end_time"),
-                IsScheduled = reader.GetBoolean("is_scheduled")
+                IsScheduled = reader.GetBoolean("is_scheduled"),
+                EarlyEnded = reader.GetOrdinal("early_ended") >= 0 && !reader.IsDBNull(reader.GetOrdinal("early_ended")) && reader.GetBoolean("early_ended")
             };
         }
     }
