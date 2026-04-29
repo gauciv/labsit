@@ -82,7 +82,11 @@ namespace LaboratorySitInSystem.ViewModels
                 var activeSession = _sessionRepo.GetActiveSessionByStudent(StudentIdInput);
                 if (activeSession != null)
                 {
-                    StatusMessage = "Student already has an active session.";
+                    // Student already has an active session — show their dashboard
+                    var existingSchedule = _scheduleRepo.GetActiveSchedule(
+                        StudentIdInput, DateTime.Now.DayOfWeek, DateTime.Now.TimeOfDay);
+                    MainViewModel.Instance.NavigateTo(new StudentSessionDashboardViewModel(
+                        student, activeSession, existingSchedule, _sessionRepo, _scheduleRepo, _studentRepo));
                     return;
                 }
 
