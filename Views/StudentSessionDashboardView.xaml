@@ -215,9 +215,17 @@
                             </Style>
                         </DataGrid.ColumnHeaderStyle>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Date" Binding="{Binding StartTime, StringFormat=MMM dd\\, yyyy}" Width="120"/>
+                            <DataGridTextColumn Header="Date" Width="120">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="StartTime" StringFormat="MMM dd, yyyy"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
                             <DataGridTextColumn Header="Subject" Binding="{Binding SubjectName}" Width="*"/>
-                            <DataGridTextColumn Header="Time in" Binding="{Binding StartTime, StringFormat=h:mm tt}" Width="100"/>
+                            <DataGridTextColumn Header="Time in" Width="100">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="StartTime" StringFormat="h:mm tt"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
                             <DataGridTextColumn Header="Time out" Width="120">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="EndTime" StringFormat="h:mm tt" TargetNullValue="— (active)"/>
