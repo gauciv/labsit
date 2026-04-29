@@ -1,54 +1,267 @@
 <UserControl x:Class="LaboratorySitInSystem.Views.AdminDashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource PageBgBrush}">
+
+    <UserControl.Resources>
+        <!-- Sidebar nav button style -->
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextOnDarkBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                Margin="8,1">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2A5090"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1A6FE8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Logout button style -->
+        <Style x:Key="LogoutButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#C0392B"/>
+            <Setter Property="Foreground" Value="{StaticResource TextOnDarkBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                Margin="8,1">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E74C3C"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#A93226"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="230"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Left Sidebar -->
-        <Border Grid.Column="0" Background="#2D2D30" Padding="10">
-            <StackPanel>
-                <TextBlock Text="Admin Panel" FontSize="18" FontWeight="Bold" Foreground="White"
-                           Margin="0,0,0,20" HorizontalAlignment="Center"/>
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- LEFT SIDEBAR                                -->
+        <!-- ═══════════════════════════════════════════ -->
+        <Border Grid.Column="0"
+                Background="{StaticResource DarkCardBrush}"
+                CornerRadius="0,16,16,0">
+            <DockPanel LastChildFill="False">
 
-                <!-- Summary -->
-                <Border Background="#3E3E42" CornerRadius="4" Padding="8" Margin="0,0,0,10">
-                    <StackPanel>
-                        <TextBlock Foreground="LightGray" FontSize="11" Text="Total Students"/>
-                        <TextBlock Foreground="White" FontSize="18" FontWeight="Bold"
-                                   Text="{Binding TotalStudents}"/>
-                    </StackPanel>
-                </Border>
-                <Border Background="#3E3E42" CornerRadius="4" Padding="8" Margin="0,0,0,20">
-                    <StackPanel>
-                        <TextBlock Foreground="LightGray" FontSize="11" Text="Active Sessions"/>
-                        <TextBlock Foreground="White" FontSize="18" FontWeight="Bold"
-                                   Text="{Binding ActiveSessionCount}"/>
-                    </StackPanel>
-                </Border>
+                <!-- Header / Branding -->
+                <StackPanel DockPanel.Dock="Top" Margin="20,24,20,0">
+                    <TextBlock Text="Laboratory"
+                               FontSize="20" FontWeight="Bold"
+                               Foreground="{StaticResource TextOnDarkBrush}"/>
+                    <TextBlock Text="Sit-In System"
+                               FontSize="13"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,4"/>
+                    <TextBlock Text="Admin Dashboard"
+                               FontSize="11"
+                               Foreground="{StaticResource TextMutedBrush}"
+                               Margin="0,0,0,20"/>
 
-                <!-- Navigation Buttons -->
-                <Button Content="Students" Command="{Binding GoToStudentManagementCommand}"
-                        Margin="0,0,0,4" Padding="8,6"/>
-                <Button Content="Schedules" Command="{Binding GoToScheduleManagementCommand}"
-                        Margin="0,0,0,4" Padding="8,6"/>
-                <Button Content="Active Sessions" Command="{Binding GoToActiveSessionsCommand}"
-                        Margin="0,0,0,4" Padding="8,6"/>
-                <Button Content="History" Command="{Binding GoToSitInHistoryCommand}"
-                        Margin="0,0,0,4" Padding="8,6"/>
-                <Button Content="Settings" Command="{Binding GoToSettingsCommand}"
-                        Margin="0,0,0,4" Padding="8,6"/>
-                <Button Content="About" Command="{Binding GoToAboutCommand}"
-                        Margin="0,0,0,20" Padding="8,6"/>
+                    <!-- Divider -->
+                    <Border Height="1" Background="#2A5090" Margin="0,0,0,12"/>
+                </StackPanel>
 
-                <Button Content="Logout" Command="{Binding LogoutCommand}"
-                        Padding="8,6" Background="#C62828" Foreground="White"/>
-            </StackPanel>
+                <!-- Stat Cards -->
+                <StackPanel DockPanel.Dock="Top" Margin="12,0,12,8">
+                    <!-- Total Students Card -->
+                    <Border Background="#2A5090" CornerRadius="8" Padding="14,10" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="Total Students"
+                                       FontSize="11"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                            <TextBlock Text="{Binding TotalStudents}"
+                                       FontSize="26" FontWeight="Bold"
+                                       Foreground="{StaticResource TextOnDarkBrush}"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Active Sessions Card -->
+                    <Border Background="#2A5090" CornerRadius="8" Padding="14,10" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="Active Sessions"
+                                       FontSize="11"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                            <TextBlock Text="{Binding ActiveSessionCount}"
+                                       FontSize="26" FontWeight="Bold"
+                                       Foreground="{StaticResource TextOnDarkBrush}"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Divider -->
+                <Border DockPanel.Dock="Top" Height="1" Background="#2A5090" Margin="20,4,20,8"/>
+
+                <!-- Navigation -->
+                <StackPanel DockPanel.Dock="Top" Margin="0,4,0,0">
+                    <TextBlock Text="NAVIGATION"
+                               FontSize="10" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMutedBrush}"
+                               Margin="20,0,0,6"/>
+
+                    <Button Content="👥  Students"
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding GoToStudentManagementCommand}"/>
+                    <Button Content="📅  Schedules"
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding GoToScheduleManagementCommand}"/>
+                    <Button Content="▶  Active Sessions"
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding GoToActiveSessionsCommand}"/>
+                    <Button Content="📋  History"
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding GoToSitInHistoryCommand}"/>
+                    <Button Content="⚙  Settings"
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding GoToSettingsCommand}"/>
+                    <Button Content="ℹ  About"
+                            Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding GoToAboutCommand}"/>
+                </StackPanel>
+
+                <!-- Logout at bottom -->
+                <Button DockPanel.Dock="Bottom"
+                        Content="🚪  Logout"
+                        Style="{StaticResource LogoutButtonStyle}"
+                        Command="{Binding LogoutCommand}"
+                        Margin="0,0,0,20"/>
+            </DockPanel>
         </Border>
 
-        <!-- Right Content Area -->
-        <ContentControl Grid.Column="1" Content="{Binding CurrentSubView}" Margin="10"/>
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- RIGHT CONTENT AREA                          -->
+        <!-- ═══════════════════════════════════════════ -->
+        <Grid Grid.Column="1" Margin="24,20,24,20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Welcome Banner (shown when no sub-view is loaded) -->
+            <Border Grid.Row="0" Grid.RowSpan="2"
+                    Visibility="{Binding CurrentSubView, Converter={StaticResource NullToVisible}}"
+                    Background="{StaticResource CardBgBrush}"
+                    CornerRadius="12"
+                    Padding="40"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.08" Color="#000000"/>
+                </Border.Effect>
+                <StackPanel HorizontalAlignment="Center" MaxWidth="420">
+                    <TextBlock Text="Welcome, Admin"
+                               FontSize="26" FontWeight="Bold"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Select a section from the sidebar to get started."
+                               FontSize="14"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,24"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"/>
+
+                    <!-- Quick-action cards row -->
+                    <UniformGrid Columns="3" HorizontalAlignment="Center">
+                        <Border Background="{StaticResource CardBgSoftBrush}"
+                                CornerRadius="10" Padding="18,16" Margin="6"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="👥" FontSize="24" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding TotalStudents}"
+                                           FontSize="22" FontWeight="Bold"
+                                           Foreground="{StaticResource PrimaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                <TextBlock Text="Students"
+                                           FontSize="11"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{StaticResource CardBgSoftBrush}"
+                                CornerRadius="10" Padding="18,16" Margin="6"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="▶" FontSize="24" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding ActiveSessionCount}"
+                                           FontSize="22" FontWeight="Bold"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                <TextBlock Text="Active"
+                                           FontSize="11"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{StaticResource CardBgSoftBrush}"
+                                CornerRadius="10" Padding="18,16" Margin="6"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="📅" FontSize="24" HorizontalAlignment="Center"/>
+                                <TextBlock Text="View"
+                                           FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{StaticResource PrimaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                <TextBlock Text="Schedules"
+                                           FontSize="11"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Sub-view content -->
+            <ContentControl Grid.Row="0" Grid.RowSpan="2"
+                            Content="{Binding CurrentSubView}"
+                            Visibility="{Binding CurrentSubView, Converter={StaticResource NullToCollapsed}}"/>
+        </Grid>
     </Grid>
 </UserControl>

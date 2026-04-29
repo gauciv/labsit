@@ -6,10 +6,16 @@
              xmlns:views="clr-namespace:LaboratorySitInSystem.Views"
              >
     <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Colors.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
         <!-- Value Converters -->
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
         <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
         <helpers:NullToCollapsedConverter x:Key="NullToCollapsed"/>
+        <helpers:NullToVisibleConverter x:Key="NullToVisible"/>
 
         <!-- ViewModel to View DataTemplates -->
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
@@ -42,5 +48,6 @@
         <DataTemplate DataType="{x:Type vm:StudentSessionDashboardViewModel}">
             <views:StudentSessionDashboardView/>
         </DataTemplate>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
