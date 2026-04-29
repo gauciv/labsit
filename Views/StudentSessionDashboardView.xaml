@@ -63,7 +63,7 @@
             <Border Grid.Row="1" Background="#F57F17" CornerRadius="6" Padding="12,8" Margin="0,0,0,12"
                     Visibility="{Binding ShowWarning, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="⚠" FontSize="16" Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="&#x26A0;" FontSize="16" Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding SessionWarning}" Foreground="White" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>
@@ -95,9 +95,8 @@
                 </DockPanel>
             </Border>
 
-            <!-- Row 3: Stat Cards (3 cards) -->
+            <!-- Row 3: Stat Cards -->
             <UniformGrid Grid.Row="3" Columns="3" Margin="0,0,0,12">
-                <!-- Time In -->
                 <Border Style="{StaticResource CardBorder}">
                     <StackPanel>
                         <TextBlock Text="Time in" Style="{StaticResource LabelText}"/>
@@ -105,7 +104,6 @@
                         <TextBlock Text="Today" Style="{StaticResource LabelText}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
-                <!-- Allowed Duration -->
                 <Border Style="{StaticResource CardBorder}">
                     <StackPanel>
                         <TextBlock Text="Allowed duration" Style="{StaticResource LabelText}"/>
@@ -113,7 +111,6 @@
                         <TextBlock Text="Per schedule" Style="{StaticResource LabelText}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
-                <!-- Sit-in Count -->
                 <Border Style="{StaticResource CardBorder}">
                     <StackPanel>
                         <TextBlock Text="Sit-in count" Style="{StaticResource LabelText}"/>
@@ -129,8 +126,6 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-
-                <!-- Student Info -->
                 <Border Grid.Column="0" Style="{StaticResource CardBorder}">
                     <StackPanel>
                         <TextBlock Text="STUDENT INFO" Style="{StaticResource SectionTitle}"/>
@@ -145,23 +140,17 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="ID Number" Foreground="#9E9E9E" Margin="0,0,20,8"/>
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Student.StudentId}" Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Right"/>
-
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="Name" Foreground="#9E9E9E" Margin="0,0,20,8"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Student.FullName}" Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Right"/>
-
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Course" Foreground="#9E9E9E" Margin="0,0,20,8"/>
                             <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Student.Course}" Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Right"/>
-
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="Year Level" Foreground="#9E9E9E" Margin="0,0,20,0"/>
                             <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Student.YearLevel}" Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Right"/>
                         </Grid>
                     </StackPanel>
                 </Border>
-
-                <!-- Today's Schedule -->
                 <Border Grid.Column="1" Style="{StaticResource CardBorder}">
                     <StackPanel>
                         <TextBlock Text="TODAY'S SCHEDULE" Style="{StaticResource SectionTitle}"/>
@@ -170,26 +159,18 @@
                                 <DataTemplate>
                                     <StackPanel Margin="0,0,0,10">
                                         <StackPanel Orientation="Horizontal">
-                                            <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
-                                                <Ellipse.Style>
-                                                    <Style TargetType="Ellipse">
-                                                        <Setter Property="Fill" Value="#2196F3"/>
-                                                    </Style>
-                                                </Ellipse.Style>
-                                            </Ellipse>
+                                            <Ellipse Width="8" Height="8" Fill="#2196F3" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding SubjectName}" Foreground="White" FontWeight="SemiBold" FontSize="13"/>
                                         </StackPanel>
                                         <TextBlock Foreground="#9E9E9E" FontSize="11" Margin="16,2,0,0">
                                             <Run Text="{Binding StartTime, StringFormat=hh\\:mm, Mode=OneWay}"/>
-                                            <Run Text=" – "/>
+                                            <Run Text=" - "/>
                                             <Run Text="{Binding EndTime, StringFormat=hh\\:mm, Mode=OneWay}"/>
                                         </TextBlock>
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock Text="No schedules today" Foreground="#666" FontStyle="Italic"
-                                   Visibility="{Binding TodaySchedules.Count, Converter={StaticResource NullToCollapsed}}"/>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -217,7 +198,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Date" Width="120">
                                 <DataGridTextColumn.Binding>
-                                    <Binding Path="StartTime" StringFormat="MMM dd, yyyy"/>
+                                    <Binding Path="StartTime" StringFormat="MMM dd yyyy"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
                             <DataGridTextColumn Header="Subject" Binding="{Binding SubjectName}" Width="*"/>
@@ -228,7 +209,7 @@
                             </DataGridTextColumn>
                             <DataGridTextColumn Header="Time out" Width="120">
                                 <DataGridTextColumn.Binding>
-                                    <Binding Path="EndTime" StringFormat="h:mm tt" TargetNullValue="— (active)"/>
+                                    <Binding Path="EndTime" StringFormat="h:mm tt" TargetNullValue="- (active)"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
                         </DataGrid.Columns>
@@ -246,7 +227,6 @@
                         Background="#C62828" Foreground="White" FontSize="13" FontWeight="SemiBold"
                         BorderBrush="#B71C1C" BorderThickness="1">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="⏹" Margin="0,0,6,0"/>
                         <TextBlock Text="End session early"/>
                     </StackPanel>
                 </Button>
