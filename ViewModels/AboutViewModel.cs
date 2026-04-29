@@ -1,5 +1,6 @@
 namespace LaboratorySitInSystem.ViewModels
 {
+    // sample
     public class AboutViewModel : ViewModelBase
     {
         public string ApplicationName => "Laboratory Sit-In System";
