@@ -64,6 +64,9 @@ namespace LaboratorySitInSystem.ViewModels
             LogoutCommand = new RelayCommand(ExecuteLogout);
 
             RefreshDashboard();
+            
+            // Set initial tab to Students
+            CurrentSubView = new StudentManagementViewModel(_studentRepo);
         }
 
         public void RefreshDashboard()
