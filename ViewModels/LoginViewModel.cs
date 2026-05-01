@@ -130,8 +130,15 @@ namespace LaboratorySitInSystem.ViewModels
                     var scheduleRepo = new ScheduleRepository();
                     var settingsRepo = new SettingsRepository();
 
-                    MainViewModel.Instance.NavigateTo(new AdminDashboardViewModel(
-                        studentRepo, sessionRepo, scheduleRepo, settingsRepo, _adminRepo));
+                    // Navigate to loading screen first
+                    var loadingViewModel = new LoadingViewModel(() =>
+                    {
+                        // After 3 seconds, navigate to admin dashboard
+                        MainViewModel.Instance.NavigateTo(new AdminDashboardViewModel(
+                            studentRepo, sessionRepo, scheduleRepo, settingsRepo, _adminRepo));
+                    });
+
+                    MainViewModel.Instance.NavigateTo(loadingViewModel);
                 }
                 else
                 {

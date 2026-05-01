@@ -34,6 +34,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="LoadingVideo\LabSit.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MySql.Data" Version="8.4.0" />
     <!-- Pin transitive dependencies to fix known vulnerabilities -->
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.1" />
