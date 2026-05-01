@@ -16,6 +16,9 @@ namespace LaboratorySitInSystem.ViewModels
         private string _confirmPassword;
         private bool _isResetMode;
         private string _resetMessage;
+        private bool _isPasswordVisible;
+        private string _passwordVisibilityText = "Show";
+        private bool _rememberMe;
 
         public string Username
         {
@@ -59,10 +62,29 @@ namespace LaboratorySitInSystem.ViewModels
             set => SetProperty(ref _resetMessage, value);
         }
 
+        public bool IsPasswordVisible
+        {
+            get => _isPasswordVisible;
+            set => SetProperty(ref _isPasswordVisible, value);
+        }
+
+        public string PasswordVisibilityText
+        {
+            get => _passwordVisibilityText;
+            set => SetProperty(ref _passwordVisibilityText, value);
+        }
+
+        public bool RememberMe
+        {
+            get => _rememberMe;
+            set => SetProperty(ref _rememberMe, value);
+        }
+
         public RelayCommand LoginCommand { get; }
         public RelayCommand GoToStudentSitInCommand { get; }
         public RelayCommand ResetPasswordCommand { get; }
         public RelayCommand ToggleResetModeCommand { get; }
+        public RelayCommand TogglePasswordVisibilityCommand { get; }
 
         public LoginViewModel(IAdminRepository adminRepo)
         {
@@ -72,6 +94,10 @@ namespace LaboratorySitInSystem.ViewModels
             GoToStudentSitInCommand = new RelayCommand(ExecuteGoToStudentSitIn);
             ResetPasswordCommand = new RelayCommand(ExecuteResetPassword);
             ToggleResetModeCommand = new RelayCommand(ExecuteToggleResetMode);
+            TogglePasswordVisibilityCommand = new RelayCommand(ExecuteTogglePasswordVisibility);
+
+            // Load saved credentials if they exist
+            LoadSavedCredentials();
         }
 
         private void ExecuteLogin(object parameter)
@@ -89,6 +115,16 @@ namespace LaboratorySitInSystem.ViewModels
                 var admin = _adminRepo.Authenticate(Username, Password);
                 if (admin != null)
                 {
+                    // Handle Remember Me functionality
+                    if (RememberMe)
+                    {
+                        SaveCredentials(Username, Password);
+                    }
+                    else
+                    {
+                        ClearSavedCredentials();
+                    }
+
                     var studentRepo = new StudentRepository();
                     var sessionRepo = new SessionRepository();
                     var scheduleRepo = new ScheduleRepository();
@@ -173,6 +209,63 @@ namespace LaboratorySitInSystem.ViewModels
             IsResetMode = !IsResetMode;
             ResetMessage = string.Empty;
             ErrorMessage = string.Empty;
+        }
+
+        private void ExecuteTogglePasswordVisibility(object parameter)
+        {
+            IsPasswordVisible = !IsPasswordVisible;
+            PasswordVisibilityText = IsPasswordVisible ? "Hide" : "Show";
+        }
+
+        private void LoadSavedCredentials()
+        {
+            try
+            {
+                var savedUsername = Properties.Settings.Default.SavedUsername;
+                var savedPassword = Properties.Settings.Default.SavedPassword;
+                var rememberMe = Properties.Settings.Default.RememberMe;
+
+                if (rememberMe && !string.IsNullOrEmpty(savedUsername) && !string.IsNullOrEmpty(savedPassword))
+                {
+                    Username = savedUsername;
+                    Password = savedPassword;
+                    RememberMe = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LOAD CREDENTIALS ERROR] {ex.Message}");
+            }
+        }
+
+        private void SaveCredentials(string username, string password)
+        {
+            try
+            {
+                Properties.Settings.Default.SavedUsername = username;
+                Properties.Settings.Default.SavedPassword = password;
+                Properties.Settings.Default.RememberMe = true;
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SAVE CREDENTIALS ERROR] {ex.Message}");
+            }
+        }
+
+        private void ClearSavedCredentials()
+        {
+            try
+            {
+                Properties.Settings.Default.SavedUsername = string.Empty;
+                Properties.Settings.Default.SavedPassword = string.Empty;
+                Properties.Settings.Default.RememberMe = false;
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CLEAR CREDENTIALS ERROR] {ex.Message}");
+            }
         }
     }
 }
