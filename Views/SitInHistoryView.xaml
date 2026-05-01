@@ -41,15 +41,17 @@
         <!-- History DataGrid -->
         <DataGrid Grid.Row="2" ItemsSource="{Binding Sessions}"
                   AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
-                  CanUserAddRows="False" Margin="0,0,0,10">
+                  CanUserAddRows="False" Margin="0,0,0,10"
+                  HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Student ID" Binding="{Binding StudentId}" Width="120"/>
-                <DataGridTextColumn Header="Student Name" Binding="{Binding StudentName}" Width="*"/>
-                <DataGridTextColumn Header="Subject" Binding="{Binding SubjectName}" Width="*"/>
-                <DataGridTextColumn Header="Start Time" Binding="{Binding StartTime, StringFormat=g}" Width="140"/>
-                <DataGridTextColumn Header="End Time" Binding="{Binding EndTime, StringFormat=g}" Width="140"/>
-                <DataGridTextColumn Header="Duration" Binding="{Binding Duration, StringFormat=hh\\:mm\\:ss}" Width="100"/>
-                <DataGridTextColumn Header="Scheduled" Binding="{Binding IsScheduled}" Width="80"/>
+                <DataGridTextColumn Header="Student ID" Binding="{Binding StudentId}" Width="100"/>
+                <DataGridTextColumn Header="Student Name" Binding="{Binding StudentName}" Width="*" MinWidth="120"/>
+                <DataGridTextColumn Header="Subject" Binding="{Binding SubjectName}" Width="*" MinWidth="100"/>
+                <DataGridTextColumn Header="Start Time" Binding="{Binding StartTime, StringFormat='MM/dd/yyyy hh:mm tt'}" Width="140"/>
+                <DataGridTextColumn Header="End Time" Binding="{Binding EndTime, StringFormat='MM/dd/yyyy hh:mm tt'}" Width="140"/>
+                <DataGridTextColumn Header="Duration" Binding="{Binding Duration, StringFormat=hh\\:mm\\:ss}" Width="80"/>
+                <DataGridCheckBoxColumn Header="Scheduled" Binding="{Binding IsScheduled}" Width="80"/>
+                <DataGridCheckBoxColumn Header="Early Ended" Binding="{Binding EarlyEnded}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
 

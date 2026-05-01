@@ -32,6 +32,7 @@ CREATE TABLE sitin_sessions (
     start_time DATETIME NOT NULL,
     end_time DATETIME NULL,
     is_scheduled BOOLEAN NOT NULL DEFAULT FALSE,
+    early_ended BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE
 );
 

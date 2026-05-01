@@ -53,7 +53,7 @@ namespace LaboratorySitInSystem.DataAccess
                       "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
                       "FROM sitin_sessions s " +
                       "JOIN students st ON s.student_id = st.student_id " +
-                      "WHERE 1=1";
+                      "WHERE s.end_time IS NOT NULL";
 
             var parameters = new List<MySqlParameter>();
 
@@ -69,8 +69,8 @@ namespace LaboratorySitInSystem.DataAccess
             }
             if (!string.IsNullOrEmpty(studentId))
             {
-                sql += " AND s.student_id = @studentId";
-                parameters.Add(new MySqlParameter("@studentId", studentId));
+                sql += " AND s.student_id LIKE @studentId";
+                parameters.Add(new MySqlParameter("@studentId", $"%{studentId}%"));
             }
             if (!string.IsNullOrEmpty(subject))
             {
@@ -184,7 +184,7 @@ namespace LaboratorySitInSystem.DataAccess
                 StartTime = reader.GetDateTime("start_time"),
                 EndTime = reader.IsDBNull(reader.GetOrdinal("end_time")) ? null : reader.GetDateTime("end_time"),
                 IsScheduled = reader.GetBoolean("is_scheduled"),
-                EarlyEnded = reader.GetOrdinal("early_ended") >= 0 && !reader.IsDBNull(reader.GetOrdinal("early_ended")) && reader.GetBoolean("early_ended")
+                EarlyEnded = !reader.IsDBNull(reader.GetOrdinal("early_ended")) && reader.GetBoolean("early_ended")
             };
         }
     }
