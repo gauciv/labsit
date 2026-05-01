@@ -16,6 +16,7 @@
         <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
         <helpers:NullToCollapsedConverter x:Key="NullToCollapsed"/>
         <helpers:NullToVisibleConverter x:Key="NullToVisible"/>
+        <helpers:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
 
         <!-- ViewModel to View DataTemplates -->
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
