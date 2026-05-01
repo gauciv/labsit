@@ -121,6 +121,12 @@ namespace LaboratorySitInSystem.ViewModels
                 return;
             }
 
+            if (EditYearLevel <= 0)
+            {
+                StatusMessage = "Year level must be greater than zero.";
+                return;
+            }
+
             var student = new Student
             {
                 StudentId = EditStudentId,
@@ -141,6 +147,12 @@ namespace LaboratorySitInSystem.ViewModels
             if (SelectedStudent == null)
             {
                 StatusMessage = "Please select a student to update.";
+                return;
+            }
+
+            if (EditYearLevel <= 0)
+            {
+                StatusMessage = "Year level must be greater than zero.";
                 return;
             }
 
