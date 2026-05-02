@@ -125,6 +125,8 @@ namespace LaboratorySitInSystem.ViewModels
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD] LoadDashboardData started for student: {Student?.StudentId}");
+                
                 // Time in
                 TimeInDisplay = ActiveSession.StartTime.ToString("h:mm tt");
 
@@ -147,9 +149,35 @@ namespace LaboratorySitInSystem.ViewModels
 
                 // Today's schedules
                 TodaySchedules.Clear();
-                var todayScheds = _scheduleRepo.GetTodaySchedules(Student.StudentId, DateTime.Now.DayOfWeek);
-                foreach (var sched in todayScheds)
-                    TodaySchedules.Add(sched);
+                var currentDay = DateTime.Now.DayOfWeek;
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD] Current day: {currentDay} ({(int)currentDay})");
+                
+                // First, let's check if the student has ANY schedules at all
+                var allSchedules = _scheduleRepo.GetByStudentId(Student.StudentId);
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD] Student has {allSchedules?.Count ?? 0} total schedules");
+                if (allSchedules != null)
+                {
+                    foreach (var sched in allSchedules)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[DASHBOARD] All schedules - {sched.SubjectName} on {sched.DayOfWeek} ({(int)sched.DayOfWeek}) from {sched.StartTime} to {sched.EndTime}");
+                    }
+                }
+                
+                var todayScheds = _scheduleRepo.GetTodaySchedules(Student.StudentId, currentDay);
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD] GetTodaySchedules returned {todayScheds?.Count ?? 0} schedules");
+                
+                if (todayScheds != null)
+                {
+                    foreach (var sched in todayScheds)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[DASHBOARD] Adding schedule: {sched.SubjectName} on {sched.DayOfWeek} ({(int)sched.DayOfWeek}) from {sched.StartTime} to {sched.EndTime}");
+                        TodaySchedules.Add(sched);
+                    }
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD] TodaySchedules.Count: {TodaySchedules.Count}");
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD] IsTodaySchedulesEmpty: {IsTodaySchedulesEmpty}");
+                
                 OnPropertyChanged(nameof(IsTodaySchedulesEmpty));
 
                 // Recent history

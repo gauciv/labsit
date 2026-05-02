@@ -6,6 +6,7 @@
     <UserControl.Resources>
         <helpers:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
         <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+        <helpers:TimeSpanToStringConverter x:Key="TimeSpanToString"/>
         
         <Style x:Key="CardBorder" TargetType="Border">
             <Setter Property="Background" Value="#2D2D30"/>
@@ -170,9 +171,9 @@
                                             <TextBlock Text="{Binding SubjectName}" Foreground="White" FontWeight="SemiBold" FontSize="13"/>
                                         </StackPanel>
                                         <TextBlock Foreground="#9E9E9E" FontSize="11" Margin="16,2,0,0">
-                                            <Run Text="{Binding StartTime, StringFormat=hh\\:mm, Mode=OneWay}"/>
+                                            <Run Text="{Binding StartTime, Converter={StaticResource TimeSpanToString}, Mode=OneWay}"/>
                                             <Run Text=" - "/>
-                                            <Run Text="{Binding EndTime, StringFormat=hh\\:mm, Mode=OneWay}"/>
+                                            <Run Text="{Binding EndTime, Converter={StaticResource TimeSpanToString}, Mode=OneWay}"/>
                                         </TextBlock>
                                     </StackPanel>
                                 </DataTemplate>
