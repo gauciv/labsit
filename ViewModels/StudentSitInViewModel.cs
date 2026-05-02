@@ -105,6 +105,9 @@ namespace LaboratorySitInSystem.ViewModels
 
                 _sessionRepo.StartSession(session);
 
+                // Notify that a session was created
+                SessionEventHub.NotifySessionStarted(StudentIdInput);
+
                 // Fetch the session back to get the auto-generated SessionId
                 var startedSession = _sessionRepo.GetActiveSessionByStudent(StudentIdInput);
 

@@ -65,8 +65,17 @@ namespace LaboratorySitInSystem.ViewModels
             ForceEndSessionCommand = new RelayCommand(ExecuteForceEndSession, CanForceEndSession);
             RefreshCommand = new RelayCommand(ExecuteRefresh);
 
+            // Subscribe to session change events
+            SessionEventHub.SessionChanged += OnSessionChanged;
+
             RefreshAndCheckSessions();
             StartTimer();
+        }
+
+        private void OnSessionChanged(object sender, SessionChangedEventArgs e)
+        {
+            // Refresh sessions when notified of changes
+            RefreshAndCheckSessions();
         }
 
         /// <summary>
@@ -145,6 +154,10 @@ namespace LaboratorySitInSystem.ViewModels
 
             _sessionRepo.EndSession(SelectedSession.SessionId, DateTime.Now);
             StatusMessage = $"Session for {SelectedSession.StudentName} ended.";
+            
+            // Notify that a session was ended
+            SessionEventHub.NotifySessionEnded(SelectedSession.StudentId);
+            
             SelectedSession = null;
             RefreshAndCheckSessions();
         }

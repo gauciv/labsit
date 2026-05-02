@@ -15,6 +15,7 @@ namespace LaboratorySitInSystem.ViewModels
         private int _totalStudents;
         private int _activeSessionCount;
         private object _currentSubView;
+        private ActiveSessionsViewModel _activeSessionsViewModel;
 
         public int TotalStudents
         {
@@ -63,10 +64,19 @@ namespace LaboratorySitInSystem.ViewModels
             GoToAboutCommand = new RelayCommand(ExecuteGoToAbout);
             LogoutCommand = new RelayCommand(ExecuteLogout);
 
+            // Subscribe to session change events
+            SessionEventHub.SessionChanged += OnSessionChanged;
+
             RefreshDashboard();
             
             // Set initial tab to Students
             CurrentSubView = new StudentManagementViewModel(_studentRepo, RefreshDashboard);
+        }
+
+        private void OnSessionChanged(object sender, SessionChangedEventArgs e)
+        {
+            // Refresh dashboard counts when sessions change
+            RefreshDashboard();
         }
 
         public void RefreshDashboard()
@@ -75,6 +85,9 @@ namespace LaboratorySitInSystem.ViewModels
             {
                 TotalStudents = _studentRepo.GetAll().Count;
                 ActiveSessionCount = _sessionRepo.GetActiveSessionCount();
+                
+                // Refresh active sessions view if it exists
+                _activeSessionsViewModel?.RefreshAndCheckSessions();
             }
             catch (Exception ex)
             {
@@ -94,7 +107,11 @@ namespace LaboratorySitInSystem.ViewModels
 
         private void ExecuteGoToActiveSessions(object parameter)
         {
-            CurrentSubView = new ActiveSessionsViewModel(_sessionRepo, _settingsRepo, _scheduleRepo);
+            if (_activeSessionsViewModel == null)
+            {
+                _activeSessionsViewModel = new ActiveSessionsViewModel(_sessionRepo, _settingsRepo, _scheduleRepo);
+            }
+            CurrentSubView = _activeSessionsViewModel;
         }
 
         private void ExecuteGoToSitInHistory(object parameter)
