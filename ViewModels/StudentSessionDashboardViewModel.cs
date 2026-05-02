@@ -232,6 +232,9 @@ namespace LaboratorySitInSystem.ViewModels
                     _sessionRepo.EndSessionEarly(ActiveSession.SessionId, DateTime.Now);
                     StatusMessage = "Session ended. Returning to login...";
 
+                    // Notify that a session was ended
+                    SessionEventHub.NotifySessionEnded(Student.StudentId);
+
                     MainViewModel.Instance.NavigateTo(new StudentSitInViewModel(
                         _studentRepo, _scheduleRepo, _sessionRepo));
                 }
