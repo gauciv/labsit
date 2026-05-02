@@ -104,4 +104,55 @@ namespace LaboratorySitInSystem.Helpers
             throw new NotSupportedException();
         }
     }
+
+    public class DotColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool isScheduled && isScheduled)
+            {
+                return new SolidColorBrush(Colors.Green);
+            }
+            return new SolidColorBrush(Colors.Orange);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class DotBorderConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool isScheduled && isScheduled)
+            {
+                return new SolidColorBrush(Color.FromRgb(0, 100, 0)); // Dark green
+            }
+            return new SolidColorBrush(Color.FromRgb(200, 100, 0)); // Dark orange
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class TimeSpanToStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is TimeSpan timeSpan)
+            {
+                return timeSpan.ToString(@"hh\:mm");
+            }
+            return value?.ToString() ?? string.Empty;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
 }
