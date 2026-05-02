@@ -92,15 +92,33 @@ namespace LaboratorySitInSystem.ViewModels
 
                 var now = DateTime.Now;
                 var schedule = _scheduleRepo.GetActiveSchedule(StudentIdInput, now.DayOfWeek, now.TimeOfDay);
+                
+                // Check if student has any schedules at all
+                var allSchedules = _scheduleRepo.GetByStudentId(StudentIdInput);
+                
+                // If student has no schedules, they cannot sit in
+                if (allSchedules == null || allSchedules.Count == 0)
+                {
+                    StatusMessage = "You cannot sit in. You have no class schedules registered.";
+                    return;
+                }
+                
+                // If student has schedules but current time doesn't match any, they cannot sit in
+                if (schedule == null)
+                {
+                    StatusMessage = "You cannot sit in. The current time does not match any of your scheduled classes.";
+                    return;
+                }
+                
                 MatchedSchedule = schedule;
 
                 var session = new SitInSession
                 {
                     StudentId = StudentIdInput,
                     StudentName = student.FullName,
-                    SubjectName = schedule?.SubjectName,
+                    SubjectName = schedule.SubjectName,
                     StartTime = now,
-                    IsScheduled = schedule != null
+                    IsScheduled = true
                 };
 
                 _sessionRepo.StartSession(session);
