@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using LaboratorySitInSystem.DataAccess;
 using LaboratorySitInSystem.Helpers;
 using LaboratorySitInSystem.Models;
@@ -78,10 +79,12 @@ namespace LaboratorySitInSystem.ViewModels
                 }
 
                 CurrentStudent = student;
+                System.Diagnostics.Debug.WriteLine($"[SITIN] Student found: {student.FullName} ({student.StudentId})");
 
                 var activeSession = _sessionRepo.GetActiveSessionByStudent(StudentIdInput);
                 if (activeSession != null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"[SITIN] Student already has active session");
                     // Student already has an active session — show their dashboard
                     var existingSchedule = _scheduleRepo.GetActiveSchedule(
                         StudentIdInput, DateTime.Now.DayOfWeek, DateTime.Now.TimeOfDay);
@@ -91,16 +94,63 @@ namespace LaboratorySitInSystem.ViewModels
                 }
 
                 var now = DateTime.Now;
-                var schedule = _scheduleRepo.GetActiveSchedule(StudentIdInput, now.DayOfWeek, now.TimeOfDay);
+                var currentDay = now.DayOfWeek;
+                var currentTime = now.TimeOfDay;
+                
+                System.Diagnostics.Debug.WriteLine($"[SITIN] Current time: {currentDay} {currentTime:hh\\:mm\\:ss}");
+                
+                // Check if student has any schedules at all
+                var allSchedules = _scheduleRepo.GetByStudentId(StudentIdInput);
+                System.Diagnostics.Debug.WriteLine($"[SITIN] Student has {allSchedules?.Count ?? 0} total schedules");
+                
+                // If student has no schedules, they cannot sit in
+                if (allSchedules == null || allSchedules.Count == 0)
+                {
+                    StatusMessage = "Access denied. You have no class schedules registered in the system.";
+                    System.Diagnostics.Debug.WriteLine($"[SITIN] DENIED: No schedules found");
+                    return;
+                }
+                
+                // Log all student's schedules for debugging
+                foreach (var sched in allSchedules)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[SITIN] Schedule: {sched.SubjectName} on {sched.DayOfWeek} from {sched.StartTime} to {sched.EndTime}");
+                }
+                
+                // Check if current time matches any schedule
+                var schedule = _scheduleRepo.GetActiveSchedule(StudentIdInput, currentDay, currentTime);
+                System.Diagnostics.Debug.WriteLine($"[SITIN] Active schedule found: {schedule?.SubjectName ?? "None"}");
+                
+                // If student has schedules but current time doesn't match any, they cannot sit in
+                if (schedule == null)
+                {
+                    // Get today's schedules to show in error message
+                    var todaySchedules = _scheduleRepo.GetTodaySchedules(StudentIdInput, currentDay);
+                    
+                    if (todaySchedules.Count > 0)
+                    {
+                        var scheduleList = string.Join(", ", todaySchedules.Select(s => $"{s.SubjectName} ({s.StartTime:hh\\:mm}-{s.EndTime:hh\\:mm})"));
+                        StatusMessage = $"Access denied. Current time ({currentTime:hh\\:mm}) does not fall within your scheduled classes today.\n\nToday's schedules: {scheduleList}";
+                    }
+                    else
+                    {
+                        StatusMessage = $"Access denied. You have no scheduled classes today ({currentDay}).";
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"[SITIN] DENIED: No active schedule at current time");
+                    return;
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"[SITIN] ACCESS GRANTED: {schedule.SubjectName}");
                 MatchedSchedule = schedule;
 
                 var session = new SitInSession
                 {
                     StudentId = StudentIdInput,
                     StudentName = student.FullName,
-                    SubjectName = schedule?.SubjectName,
+                    SubjectName = schedule.SubjectName,
                     StartTime = now,
-                    IsScheduled = schedule != null
+                    IsScheduled = true
                 };
 
                 _sessionRepo.StartSession(session);
