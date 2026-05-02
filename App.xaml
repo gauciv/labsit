@@ -14,9 +14,12 @@
         <!-- Value Converters -->
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
         <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+        <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
         <helpers:NullToCollapsedConverter x:Key="NullToCollapsed"/>
         <helpers:NullToVisibleConverter x:Key="NullToVisible"/>
         <helpers:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <helpers:DotColorConverter x:Key="DotColorConverter"/>
+        <helpers:DotBorderConverter x:Key="DotBorderConverter"/>
 
         <!-- ViewModel to View DataTemplates -->
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
