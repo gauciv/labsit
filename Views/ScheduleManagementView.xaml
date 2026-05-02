@@ -1,13 +1,17 @@
 <UserControl x:Class="LaboratorySitInSystem.Views.ScheduleManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib">
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:helpers="clr-namespace:LaboratorySitInSystem.Helpers">
     <UserControl.Resources>
         <ObjectDataProvider x:Key="DayOfWeekValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="sys:DayOfWeek"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        
+        <helpers:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
     </UserControl.Resources>
 
     <Grid Background="{StaticResource PageBgBrush}">
@@ -83,7 +87,16 @@
                                   BorderBrush="{StaticResource BorderBrush}"
                                   BorderThickness="1"
                                   Padding="8,6"
-                                  FontSize="13"/>
+                                  FontSize="13"
+                                  Visibility="{Binding IsStudentsEmpty, Converter={StaticResource InverseBoolToVisibility}}"/>
+                        
+                        <!-- Empty Students Message -->
+                        <TextBlock Grid.Column="1"
+                                   Text="No students available"
+                                   FontSize="13"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding IsStudentsEmpty, Converter={StaticResource BoolToVisibility}}"/>
                     </Grid>
                 </Border>
             </Grid>
@@ -133,7 +146,8 @@
                         <!-- DataGrid with ScrollViewer -->
                         <ScrollViewer Grid.Row="1"
                                       VerticalScrollBarVisibility="Auto"
-                                      HorizontalScrollBarVisibility="Disabled">
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Visibility="{Binding IsSchedulesEmpty, Converter={StaticResource InverseBoolToVisibility}}">
                             <DataGrid ItemsSource="{Binding Schedules}" 
                                       SelectedItem="{Binding SelectedSchedule}"
                                       AutoGenerateColumns="False" 
@@ -199,6 +213,55 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </ScrollViewer>
+                        
+                        <!-- Empty State for Schedules -->
+                        <StackPanel Grid.Row="1" 
+                                    HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center"
+                                    Margin="40"
+                                    Visibility="{Binding IsSchedulesEmpty, Converter={StaticResource BoolToVisibility}}">
+                            
+                            <!-- Icon -->
+                            <Border Background="{StaticResource CardBgSoftBrush}"
+                                    Width="80"
+                                    Height="80"
+                                    CornerRadius="40"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,0,0,24">
+                                <TextBlock Text="📅" 
+                                           FontSize="40"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <!-- Title -->
+                            <TextBlock Text="No Schedules Yet" 
+                                       FontSize="20" 
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,8"/>
+                            
+                            <!-- Subtitle -->
+                            <TextBlock FontSize="14"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       MaxWidth="400"
+                                       Margin="0,0,0,16">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="This student has no class schedules yet. Add a schedule using the form below."/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedStudent}" Value="{x:Null}">
+                                                <Setter Property="Text" Value="Select a student from the dropdown above to get started."/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
                     </Grid>
                 </Border>
 

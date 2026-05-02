@@ -26,6 +26,8 @@ namespace LaboratorySitInSystem.ViewModels
             set => SetProperty(ref _students, value);
         }
 
+        public bool IsEmpty => Students.Count == 0;
+
         public Student SelectedStudent
         {
             get => _selectedStudent;
@@ -108,6 +110,7 @@ namespace LaboratorySitInSystem.ViewModels
             {
                 Students.Add(student);
             }
+            OnPropertyChanged(nameof(IsEmpty));
         }
 
         private void ExecuteAdd(object parameter)
@@ -192,6 +195,7 @@ namespace LaboratorySitInSystem.ViewModels
             {
                 Students.Add(student);
             }
+            OnPropertyChanged(nameof(IsEmpty));
         }
 
         private void ExecuteClearForm(object parameter)

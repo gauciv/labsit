@@ -71,19 +71,15 @@ namespace LaboratorySitInSystem.Helpers
         }
     }
 
-    public class DotColorConverter : IValueConverter
+    public class CollectionEmptyToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool isSelected = value is true;
-            if (isSelected)
+            if (value is System.Collections.ICollection collection)
             {
-                return Application.Current.Resources["PrimaryBrush"] as SolidColorBrush;
+                return collection.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             }
-            else
-            {
-                return Brushes.Transparent;
-            }
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -92,12 +88,15 @@ namespace LaboratorySitInSystem.Helpers
         }
     }
 
-    public class DotBorderConverter : IValueConverter
+    public class CollectionNotEmptyToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool isSelected = value is true;
-            return isSelected ? new Thickness(0) : new Thickness(2);
+            if (value is System.Collections.ICollection collection)
+            {
+                return collection.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
