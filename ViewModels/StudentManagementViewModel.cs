@@ -9,6 +9,7 @@ namespace LaboratorySitInSystem.ViewModels
     public class StudentManagementViewModel : ViewModelBase
     {
         private readonly IStudentRepository _studentRepo;
+        private readonly Action _onStudentCountChanged;
 
         private ObservableCollection<Student> _students;
         private Student _selectedStudent;
@@ -88,9 +89,10 @@ namespace LaboratorySitInSystem.ViewModels
         public RelayCommand SearchCommand { get; }
         public RelayCommand ClearFormCommand { get; }
 
-        public StudentManagementViewModel(IStudentRepository studentRepo)
+        public StudentManagementViewModel(IStudentRepository studentRepo, Action onStudentCountChanged = null)
         {
             _studentRepo = studentRepo ?? throw new ArgumentNullException(nameof(studentRepo));
+            _onStudentCountChanged = onStudentCountChanged;
 
             Students = new ObservableCollection<Student>();
 
@@ -103,7 +105,7 @@ namespace LaboratorySitInSystem.ViewModels
             LoadAllStudents();
         }
 
-        private void LoadAllStudents()
+        public void LoadAllStudents()
         {
             Students.Clear();
             foreach (var student in _studentRepo.GetAll())
@@ -143,6 +145,9 @@ namespace LaboratorySitInSystem.ViewModels
             LoadAllStudents();
             ClearForm();
             StatusMessage = "Student added successfully.";
+            
+            // Notify dashboard of student count change
+            _onStudentCountChanged?.Invoke();
         }
 
         private void ExecuteUpdate(object parameter)
@@ -181,6 +186,9 @@ namespace LaboratorySitInSystem.ViewModels
             LoadAllStudents();
             ClearForm();
             StatusMessage = "Student deleted successfully.";
+            
+            // Notify dashboard of student count change
+            _onStudentCountChanged?.Invoke();
         }
 
         private void ExecuteSearch(object parameter)
