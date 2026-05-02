@@ -66,7 +66,7 @@ namespace LaboratorySitInSystem.ViewModels
             RefreshDashboard();
             
             // Set initial tab to Students
-            CurrentSubView = new StudentManagementViewModel(_studentRepo);
+            CurrentSubView = new StudentManagementViewModel(_studentRepo, RefreshDashboard);
         }
 
         public void RefreshDashboard()
@@ -84,7 +84,7 @@ namespace LaboratorySitInSystem.ViewModels
 
         private void ExecuteGoToStudentManagement(object parameter)
         {
-            CurrentSubView = new StudentManagementViewModel(_studentRepo);
+            CurrentSubView = new StudentManagementViewModel(_studentRepo, RefreshDashboard);
         }
 
         private void ExecuteGoToScheduleManagement(object parameter)

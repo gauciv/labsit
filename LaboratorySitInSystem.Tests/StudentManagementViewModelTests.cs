@@ -208,5 +208,37 @@ namespace LaboratorySitInSystem.Tests
             Assert.Null(vm.SelectedStudent);
             Assert.Equal(string.Empty, vm.StatusMessage);
         }
+
+        [Fact]
+        public void AddCommand_InvokesCallbackWhenProvided()
+        {
+            var callbackInvoked = false;
+            var vm = new StudentManagementViewModel(_mockStudentRepo.Object, () => callbackInvoked = true);
+
+            vm.EditStudentId = "S001";
+            vm.EditFirstName = "John";
+            vm.EditLastName = "Doe";
+            vm.EditCourse = "BSCS";
+            vm.EditYearLevel = 2;
+
+            vm.AddCommand.Execute(null);
+
+            Assert.True(callbackInvoked);
+        }
+
+        [Fact]
+        public void DeleteCommand_InvokesCallbackWhenProvided()
+        {
+            var callbackInvoked = false;
+            var student = new Student { StudentId = "S001", FirstName = "John", LastName = "Doe", Course = "BSCS", YearLevel = 2 };
+            var vm = new StudentManagementViewModel(_mockStudentRepo.Object, () => callbackInvoked = true);
+            _mockStudentRepo.Setup(r => r.GetAll()).Returns(new List<Student> { student });
+            vm.LoadAllStudents();
+
+            vm.SelectedStudent = student;
+            vm.DeleteCommand.Execute(null);
+
+            Assert.True(callbackInvoked);
+        }
     }
 }
