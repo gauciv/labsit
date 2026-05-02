@@ -117,6 +117,8 @@ namespace LaboratorySitInSystem.DataAccess
         public List<ClassSchedule> GetTodaySchedules(string studentId, DayOfWeek today)
         {
             var schedules = new List<ClassSchedule>();
+            System.Diagnostics.Debug.WriteLine($"[SCHEDULE_REPO] GetTodaySchedules called with studentId: {studentId}, day: {today} ({(int)today})");
+            
             using var connection = DatabaseHelper.GetConnection();
             connection.Open();
             using var command = new MySqlCommand(
@@ -126,11 +128,19 @@ namespace LaboratorySitInSystem.DataAccess
                 connection);
             command.Parameters.AddWithValue("@studentId", studentId);
             command.Parameters.AddWithValue("@day", (int)today);
+            
+            System.Diagnostics.Debug.WriteLine($"[SCHEDULE_REPO] SQL: {command.CommandText}");
+            System.Diagnostics.Debug.WriteLine($"[SCHEDULE_REPO] Parameters: studentId={studentId}, day={(int)today}");
+            
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
-                schedules.Add(ReadSchedule(reader));
+                var schedule = ReadSchedule(reader);
+                System.Diagnostics.Debug.WriteLine($"[SCHEDULE_REPO] Found schedule: {schedule.SubjectName} on day {schedule.DayOfWeek} ({(int)schedule.DayOfWeek})");
+                schedules.Add(schedule);
             }
+            
+            System.Diagnostics.Debug.WriteLine($"[SCHEDULE_REPO] Returning {schedules.Count} schedules");
             return schedules;
         }
     }
