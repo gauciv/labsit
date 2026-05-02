@@ -1,11 +1,16 @@
 <UserControl x:Class="LaboratorySitInSystem.Views.ActiveSessionsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:helpers="clr-namespace:LaboratorySitInSystem.Helpers">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Colors.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converters -->
+            <helpers:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+            <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
 
             <!-- Modern Button Style -->
             <Style x:Key="ModernButtonStyle" TargetType="Button">
@@ -316,7 +321,8 @@
                           ColumnHeaderStyle="{StaticResource ModernColumnHeaderStyle}"
                           CellStyle="{StaticResource ModernCellStyle}"
                           RowStyle="{StaticResource ModernRowStyle}"
-                          Margin="0">
+                          Margin="0"
+                          Visibility="{Binding IsEmpty, Converter={StaticResource InverseBoolToVisibility}}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Student Name" 
                                             Binding="{Binding StudentName}" 
@@ -367,6 +373,53 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+
+                <!-- Empty State -->
+                <StackPanel Grid.Row="1" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center"
+                            Margin="40"
+                            Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}">
+                    
+                    <!-- Icon -->
+                    <Border Background="{StaticResource CardBgSoftBrush}"
+                            Width="80"
+                            Height="80"
+                            CornerRadius="40"
+                            HorizontalAlignment="Center"
+                            Margin="0,0,0,24">
+                        <TextBlock Text="📋" 
+                                   FontSize="40"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                    
+                    <!-- Title -->
+                    <TextBlock Text="No Active Sessions" 
+                               FontSize="20" 
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,8"/>
+                    
+                    <!-- Subtitle -->
+                    <TextBlock Text="There are currently no students sitting in the laboratory."
+                               FontSize="14"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               MaxWidth="400"
+                               Margin="0,0,0,24"/>
+                    
+                    <!-- Info Text -->
+                    <TextBlock FontSize="13"
+                               Foreground="{StaticResource TextMutedBrush}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center">
+                        <Run Text="Sessions will appear here when students sign in."/>
+                    </TextBlock>
+                </StackPanel>
 
                 <!-- Action Footer -->
                 <Border Grid.Row="2" 

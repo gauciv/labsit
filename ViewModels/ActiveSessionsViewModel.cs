@@ -22,6 +22,8 @@ namespace LaboratorySitInSystem.ViewModels
 
         public ObservableCollection<SitInSession> ActiveSessions { get; }
 
+        public bool IsEmpty => ActiveSessions.Count == 0;
+
         public SitInSession SelectedSession
         {
             get => _selectedSession;
@@ -95,6 +97,7 @@ namespace LaboratorySitInSystem.ViewModels
             {
                 ActiveSessions.Add(session);
             }
+            OnPropertyChanged(nameof(IsEmpty));
         }
 
         private void CheckAlarmThreshold()
