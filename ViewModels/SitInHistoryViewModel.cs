@@ -18,6 +18,8 @@ namespace LaboratorySitInSystem.ViewModels
 
         public ObservableCollection<SitInSession> Sessions { get; }
 
+        public bool IsEmpty => Sessions.Count == 0;
+
         public DateTime? FromDate
         {
             get => _fromDate;
@@ -84,6 +86,7 @@ namespace LaboratorySitInSystem.ViewModels
             {
                 Sessions.Add(session);
             }
+            OnPropertyChanged(nameof(IsEmpty));
             StatusMessage = $"{Sessions.Count} record(s) found.";
         }
     }

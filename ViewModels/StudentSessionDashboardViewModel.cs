@@ -89,6 +89,9 @@ namespace LaboratorySitInSystem.ViewModels
         public ObservableCollection<ClassSchedule> TodaySchedules { get; }
         public ObservableCollection<SitInSession> RecentHistory { get; }
 
+        public bool IsTodaySchedulesEmpty => TodaySchedules.Count == 0;
+        public bool IsRecentHistoryEmpty => RecentHistory.Count == 0;
+
         public RelayCommand EndSessionEarlyCommand { get; }
         public RelayCommand LogoutCommand { get; }
 
@@ -147,12 +150,14 @@ namespace LaboratorySitInSystem.ViewModels
                 var todayScheds = _scheduleRepo.GetTodaySchedules(Student.StudentId, DateTime.Now.DayOfWeek);
                 foreach (var sched in todayScheds)
                     TodaySchedules.Add(sched);
+                OnPropertyChanged(nameof(IsTodaySchedulesEmpty));
 
                 // Recent history
                 RecentHistory.Clear();
                 var history = _sessionRepo.GetStudentRecentHistory(Student.StudentId, 10);
                 foreach (var h in history)
                     RecentHistory.Add(h);
+                OnPropertyChanged(nameof(IsRecentHistoryEmpty));
 
                 UpdateTimeRemaining();
             }

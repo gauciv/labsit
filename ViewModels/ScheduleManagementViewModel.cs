@@ -27,6 +27,8 @@ namespace LaboratorySitInSystem.ViewModels
             set => SetProperty(ref _students, value);
         }
 
+        public bool IsStudentsEmpty => Students?.Count == 0;
+
         public Student SelectedStudent
         {
             get => _selectedStudent;
@@ -44,6 +46,8 @@ namespace LaboratorySitInSystem.ViewModels
             get => _schedules;
             set => SetProperty(ref _schedules, value);
         }
+
+        public bool IsSchedulesEmpty => Schedules?.Count == 0;
 
         public ClassSchedule SelectedSchedule
         {
@@ -115,6 +119,7 @@ namespace LaboratorySitInSystem.ViewModels
             {
                 Students.Add(student);
             }
+            OnPropertyChanged(nameof(IsStudentsEmpty));
         }
 
         private void LoadSchedulesForSelectedStudent()
@@ -127,6 +132,7 @@ namespace LaboratorySitInSystem.ViewModels
                     Schedules.Add(schedule);
                 }
             }
+            OnPropertyChanged(nameof(IsSchedulesEmpty));
         }
 
         private void ExecuteAdd(object parameter)
