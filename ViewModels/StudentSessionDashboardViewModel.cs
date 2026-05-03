@@ -14,6 +14,7 @@ namespace LaboratorySitInSystem.ViewModels
         private readonly ISessionRepository _sessionRepo;
         private readonly IScheduleRepository _scheduleRepo;
         private readonly IStudentRepository _studentRepo;
+        private Timer _timer;
 
         private Student _student;
         private SitInSession _activeSession;
@@ -110,6 +111,20 @@ namespace LaboratorySitInSystem.ViewModels
             Student = student;
             ActiveSession = activeSession;
             ActiveSchedule = activeSchedule;
+            
+            // Debug logging for schedule information
+            System.Diagnostics.Debug.WriteLine($"[DASHBOARD_INIT] Student: {student?.FullName}");
+            System.Diagnostics.Debug.WriteLine($"[DASHBOARD_INIT] Session started: {activeSession?.StartTime}");
+            if (activeSchedule != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD_INIT] Schedule: {activeSchedule.SubjectName}");
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD_INIT] Schedule time: {activeSchedule.StartTime:hh\\:mm} - {activeSchedule.EndTime:hh\\:mm}");
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD_INIT] Schedule day: {activeSchedule.DayOfWeek}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[DASHBOARD_INIT] No active schedule provided");
+            }
 
             TodaySchedules = new ObservableCollection<ClassSchedule>();
             RecentHistory = new ObservableCollection<SitInSession>();
@@ -198,20 +213,30 @@ namespace LaboratorySitInSystem.ViewModels
 
         public void UpdateTimeRemaining()
         {
+            var now = DateTime.Now;
+            var currentTime = now.TimeOfDay;
+            
+            System.Diagnostics.Debug.WriteLine($"[TIME_UPDATE] Current time: {currentTime:hh\\:mm\\:ss}");
+            
             if (ActiveSchedule != null)
             {
-                var now = DateTime.Now.TimeOfDay;
-                var remaining = ActiveSchedule.EndTime - now;
+                System.Diagnostics.Debug.WriteLine($"[TIME_UPDATE] Schedule: {ActiveSchedule.SubjectName} ends at {ActiveSchedule.EndTime:hh\\:mm\\:ss}");
+                
+                var remaining = ActiveSchedule.EndTime - currentTime;
+                System.Diagnostics.Debug.WriteLine($"[TIME_UPDATE] Calculated remaining: {remaining:hh\\:mm\\:ss}");
 
                 if (remaining.TotalSeconds <= 0)
                 {
                     TimeRemainingDisplay = "00:00:00";
                     SessionWarning = "Your session time has ended.";
                     ShowWarning = true;
+                    System.Diagnostics.Debug.WriteLine($"[TIME_UPDATE] Session ended");
                 }
                 else
                 {
+                    // Ensure we show positive time remaining
                     TimeRemainingDisplay = remaining.ToString(@"hh\:mm\:ss");
+                    System.Diagnostics.Debug.WriteLine($"[TIME_UPDATE] Display: {TimeRemainingDisplay}");
 
                     if (remaining.TotalMinutes <= 15)
                     {
@@ -226,23 +251,41 @@ namespace LaboratorySitInSystem.ViewModels
             }
             else
             {
-                // Walk-in: show elapsed time
-                var elapsed = DateTime.Now - ActiveSession.StartTime;
+                // Walk-in: show elapsed time (this shouldn't happen with new validation)
+                var elapsed = now - ActiveSession.StartTime;
                 TimeRemainingDisplay = elapsed.ToString(@"hh\:mm\:ss");
                 ShowWarning = false;
+                System.Diagnostics.Debug.WriteLine($"[TIME_UPDATE] Walk-in mode - elapsed: {TimeRemainingDisplay}");
             }
         }
 
         protected virtual void StartTimer()
         {
-            var timer = new Timer(_ =>
+            // Dispose existing timer if any
+            _timer?.Dispose();
+            
+            System.Diagnostics.Debug.WriteLine("[TIMER] Starting countdown timer");
+            
+            _timer = new Timer(_ =>
             {
                 try
                 {
-                    Application.Current?.Dispatcher?.Invoke(() => UpdateTimeRemaining());
+                    Application.Current?.Dispatcher?.Invoke(() => 
+                    {
+                        UpdateTimeRemaining();
+                    });
                 }
-                catch { /* UI thread may be gone */ }
-            }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[TIMER ERROR] {ex.Message}");
+                }
+            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1)); // Start immediately, then every second
+        }
+
+        // Add cleanup method
+        public void Dispose()
+        {
+            _timer?.Dispose();
         }
 
         private void ExecuteEndSessionEarly(object parameter)
