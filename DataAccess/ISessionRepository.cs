@@ -15,5 +15,6 @@ namespace LaboratorySitInSystem.DataAccess
         int GetStudentSitInCount(string studentId);
         List<SitInSession> GetStudentRecentHistory(string studentId, int limit);
         void EndSessionEarly(int sessionId, DateTime endTime);
+        void ApproveSession(int sessionId);
     }
 }

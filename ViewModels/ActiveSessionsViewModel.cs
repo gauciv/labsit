@@ -19,10 +19,25 @@ namespace LaboratorySitInSystem.ViewModels
         private bool _isAlarmActive;
         private int _alarmThreshold;
         private string _statusMessage;
+        private bool _isApprovalPopupOpen;
+        private SitInSession _pendingApprovalSession;
 
         public ObservableCollection<SitInSession> ActiveSessions { get; }
+        public ObservableCollection<SitInSession> PendingApprovals { get; }
 
         public bool IsEmpty => ActiveSessions.Count == 0;
+
+        public bool IsApprovalPopupOpen
+        {
+            get => _isApprovalPopupOpen;
+            set => SetProperty(ref _isApprovalPopupOpen, value);
+        }
+
+        public SitInSession PendingApprovalSession
+        {
+            get => _pendingApprovalSession;
+            set => SetProperty(ref _pendingApprovalSession, value);
+        }
 
         public SitInSession SelectedSession
         {
@@ -50,6 +65,8 @@ namespace LaboratorySitInSystem.ViewModels
 
         public RelayCommand ForceEndSessionCommand { get; }
         public RelayCommand RefreshCommand { get; }
+        public RelayCommand ApproveSessionCommand { get; }
+        public RelayCommand DeclineSessionCommand { get; }
 
         public ActiveSessionsViewModel(
             ISessionRepository sessionRepo,
@@ -61,12 +78,43 @@ namespace LaboratorySitInSystem.ViewModels
             _scheduleRepo = scheduleRepo ?? throw new ArgumentNullException(nameof(scheduleRepo));
 
             ActiveSessions = new ObservableCollection<SitInSession>();
+            PendingApprovals = new ObservableCollection<SitInSession>();
 
             ForceEndSessionCommand = new RelayCommand(ExecuteForceEndSession, CanForceEndSession);
             RefreshCommand = new RelayCommand(ExecuteRefresh);
+            ApproveSessionCommand = new RelayCommand(ExecuteApproveSession);
+            DeclineSessionCommand = new RelayCommand(ExecuteDeclineSession);
 
             RefreshAndCheckSessions();
             StartTimer();
+            
+            // TEMPORARY: Add dummy pending approval for screenshot/testing
+            AddDummyPendingApproval();
+        }
+
+        /// <summary>
+        /// TEMPORARY METHOD: Adds a dummy pending approval session for testing/screenshot purposes.
+        /// Remove this method and the call in the constructor when done testing.
+        /// </summary>
+        private void AddDummyPendingApproval()
+        {
+            var dummySession = new SitInSession
+            {
+                SessionId = 999,
+                StudentId = "2021-12345",
+                StudentName = "Juan Dela Cruz",
+                SubjectName = "Computer Programming 101",
+                StartTime = DateTime.Now,
+                IsScheduled = false,
+                RequiresApproval = true,
+                IsApproved = false
+            };
+            
+            PendingApprovals.Add(dummySession);
+            
+            // Automatically show the popup
+            PendingApprovalSession = dummySession;
+            IsApprovalPopupOpen = true;
         }
 
         /// <summary>
@@ -93,9 +141,18 @@ namespace LaboratorySitInSystem.ViewModels
         {
             var sessions = _sessionRepo.GetActiveSessions();
             ActiveSessions.Clear();
+            PendingApprovals.Clear();
+            
             foreach (var session in sessions)
             {
-                ActiveSessions.Add(session);
+                if (session.RequiresApproval && !session.IsApproved)
+                {
+                    PendingApprovals.Add(session);
+                }
+                else
+                {
+                    ActiveSessions.Add(session);
+                }
             }
             OnPropertyChanged(nameof(IsEmpty));
         }
@@ -156,6 +213,40 @@ namespace LaboratorySitInSystem.ViewModels
 
         private void ExecuteRefresh(object parameter)
         {
+            RefreshAndCheckSessions();
+        }
+
+        private void ExecuteApproveSession(object parameter)
+        {
+            if (PendingApprovalSession == null) return;
+
+            // Update session approval status
+            PendingApprovalSession.IsApproved = true;
+            PendingApprovalSession.RequiresApproval = false;
+            
+            // Update in database via repository
+            _sessionRepo.ApproveSession(PendingApprovalSession.SessionId);
+
+            StatusMessage = $"Session for {PendingApprovalSession.StudentName} approved.";
+            
+            // Close popup and refresh
+            IsApprovalPopupOpen = false;
+            PendingApprovalSession = null;
+            RefreshAndCheckSessions();
+        }
+
+        private void ExecuteDeclineSession(object parameter)
+        {
+            if (PendingApprovalSession == null) return;
+
+            // End the session since it was declined
+            _sessionRepo.EndSession(PendingApprovalSession.SessionId, DateTime.Now);
+            
+            StatusMessage = $"Session request for {PendingApprovalSession.StudentName} declined.";
+            
+            // Close popup and refresh
+            IsApprovalPopupOpen = false;
+            PendingApprovalSession = null;
             RefreshAndCheckSessions();
         }
     }

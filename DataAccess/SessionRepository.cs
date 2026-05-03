@@ -7,6 +7,70 @@ namespace LaboratorySitInSystem.DataAccess
 {
     public class SessionRepository : ISessionRepository
     {
+        // Static constructor to run migrations once when the class is first used
+        static SessionRepository()
+        {
+            EnsureApprovalColumnsExist();
+        }
+
+        /// <summary>
+        /// Checks if the approval columns exist in the sitin_sessions table and adds them if missing.
+        /// This runs automatically on first use of SessionRepository.
+        /// </summary>
+        private static void EnsureApprovalColumnsExist()
+        {
+            try
+            {
+                using var connection = DatabaseHelper.GetConnection();
+                connection.Open();
+
+                // Check if requires_approval column exists
+                bool requiresApprovalExists = ColumnExists(connection, "sitin_sessions", "requires_approval");
+                bool isApprovedExists = ColumnExists(connection, "sitin_sessions", "is_approved");
+
+                // Add requires_approval column if it doesn't exist
+                if (!requiresApprovalExists)
+                {
+                    using var cmd = new MySqlCommand(
+                        "ALTER TABLE sitin_sessions ADD COLUMN requires_approval BOOLEAN NOT NULL DEFAULT FALSE",
+                        connection);
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("Added 'requires_approval' column to sitin_sessions table.");
+                }
+
+                // Add is_approved column if it doesn't exist
+                if (!isApprovedExists)
+                {
+                    using var cmd = new MySqlCommand(
+                        "ALTER TABLE sitin_sessions ADD COLUMN is_approved BOOLEAN NOT NULL DEFAULT FALSE",
+                        connection);
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("Added 'is_approved' column to sitin_sessions table.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't crash the application
+                Console.WriteLine($"Error ensuring approval columns exist: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Helper method to check if a column exists in a table.
+        /// </summary>
+        private static bool ColumnExists(MySqlConnection connection, string tableName, string columnName)
+        {
+            using var cmd = new MySqlCommand(
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = @tableName AND COLUMN_NAME = @columnName",
+                connection);
+            cmd.Parameters.AddWithValue("@tableName", tableName);
+            cmd.Parameters.AddWithValue("@columnName", columnName);
+            
+            var result = cmd.ExecuteScalar();
+            return Convert.ToInt32(result) > 0;
+        }
+
         public List<SitInSession> GetActiveSessions()
         {
             var sessions = new List<SitInSession>();
@@ -14,7 +78,8 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
             using var command = new MySqlCommand(
                 "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, " +
+                "s.requires_approval, s.is_approved " +
                 "FROM sitin_sessions s " +
                 "JOIN students st ON s.student_id = st.student_id " +
                 "WHERE s.end_time IS NULL",
@@ -33,7 +98,8 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
             using var command = new MySqlCommand(
                 "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, " +
+                "s.requires_approval, s.is_approved " +
                 "FROM sitin_sessions s " +
                 "JOIN students st ON s.student_id = st.student_id " +
                 "WHERE s.end_time IS NULL AND s.student_id = @studentId",
@@ -50,7 +116,8 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
 
             var sql = "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                      "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
+                      "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, " +
+                      "s.requires_approval, s.is_approved " +
                       "FROM sitin_sessions s " +
                       "JOIN students st ON s.student_id = st.student_id " +
                       "WHERE s.end_time IS NOT NULL";
@@ -95,13 +162,15 @@ namespace LaboratorySitInSystem.DataAccess
             using var connection = DatabaseHelper.GetConnection();
             connection.Open();
             using var command = new MySqlCommand(
-                "INSERT INTO sitin_sessions (student_id, subject_name, start_time, is_scheduled) " +
-                "VALUES (@studentId, @subjectName, @startTime, @isScheduled)",
+                "INSERT INTO sitin_sessions (student_id, subject_name, start_time, is_scheduled, requires_approval, is_approved) " +
+                "VALUES (@studentId, @subjectName, @startTime, @isScheduled, @requiresApproval, @isApproved)",
                 connection);
             command.Parameters.AddWithValue("@studentId", session.StudentId);
             command.Parameters.AddWithValue("@subjectName", session.SubjectName);
             command.Parameters.AddWithValue("@startTime", session.StartTime);
             command.Parameters.AddWithValue("@isScheduled", session.IsScheduled);
+            command.Parameters.AddWithValue("@requiresApproval", session.RequiresApproval);
+            command.Parameters.AddWithValue("@isApproved", session.IsApproved);
             command.ExecuteNonQuery();
         }
 
@@ -145,7 +214,8 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
             using var command = new MySqlCommand(
                 "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, " +
+                "s.requires_approval, s.is_approved " +
                 "FROM sitin_sessions s " +
                 "JOIN students st ON s.student_id = st.student_id " +
                 "WHERE s.student_id = @studentId " +
@@ -173,6 +243,17 @@ namespace LaboratorySitInSystem.DataAccess
             command.ExecuteNonQuery();
         }
 
+        public void ApproveSession(int sessionId)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "UPDATE sitin_sessions SET is_approved = TRUE, requires_approval = FALSE WHERE session_id = @sessionId",
+                connection);
+            command.Parameters.AddWithValue("@sessionId", sessionId);
+            command.ExecuteNonQuery();
+        }
+
         private static SitInSession ReadSession(MySqlDataReader reader)
         {
             return new SitInSession
@@ -184,7 +265,9 @@ namespace LaboratorySitInSystem.DataAccess
                 StartTime = reader.GetDateTime("start_time"),
                 EndTime = reader.IsDBNull(reader.GetOrdinal("end_time")) ? null : reader.GetDateTime("end_time"),
                 IsScheduled = reader.GetBoolean("is_scheduled"),
-                EarlyEnded = !reader.IsDBNull(reader.GetOrdinal("early_ended")) && reader.GetBoolean("early_ended")
+                EarlyEnded = !reader.IsDBNull(reader.GetOrdinal("early_ended")) && reader.GetBoolean("early_ended"),
+                RequiresApproval = !reader.IsDBNull(reader.GetOrdinal("requires_approval")) && reader.GetBoolean("requires_approval"),
+                IsApproved = !reader.IsDBNull(reader.GetOrdinal("is_approved")) && reader.GetBoolean("is_approved")
             };
         }
     }
