@@ -173,6 +173,24 @@ namespace LaboratorySitInSystem.DataAccess
             command.ExecuteNonQuery();
         }
 
+        public bool HasEndedSessionEarlyToday(string studentId, string subjectName, DateTime currentDate)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "SELECT COUNT(*) FROM sitin_sessions " +
+                "WHERE student_id = @studentId " +
+                "AND subject_name = @subjectName " +
+                "AND DATE(start_time) = DATE(@currentDate) " +
+                "AND early_ended = TRUE",
+                connection);
+            command.Parameters.AddWithValue("@studentId", studentId);
+            command.Parameters.AddWithValue("@subjectName", subjectName);
+            command.Parameters.AddWithValue("@currentDate", currentDate);
+            var count = Convert.ToInt32(command.ExecuteScalar());
+            return count > 0;
+        }
+
         private static SitInSession ReadSession(MySqlDataReader reader)
         {
             return new SitInSession

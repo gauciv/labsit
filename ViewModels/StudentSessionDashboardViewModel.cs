@@ -291,7 +291,9 @@ namespace LaboratorySitInSystem.ViewModels
         private void ExecuteEndSessionEarly(object parameter)
         {
             var result = MessageBox.Show(
-                "Are you sure you want to end your session early?\n\nYou will not be able to rejoin this session.",
+                "Are you sure you want to end your session early?\n\n" +
+                "⚠️ WARNING: You will NOT be able to rejoin this class session today.\n" +
+                "This action is permanent and cannot be undone.",
                 "End Session Early",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
@@ -301,7 +303,7 @@ namespace LaboratorySitInSystem.ViewModels
                 try
                 {
                     _sessionRepo.EndSessionEarly(ActiveSession.SessionId, DateTime.Now);
-                    StatusMessage = "Session ended. Returning to login...";
+                    StatusMessage = "Session ended early. You cannot rejoin this class today.";
 
                     // Notify that a session was ended
                     SessionEventHub.NotifySessionEnded(Student.StudentId);
