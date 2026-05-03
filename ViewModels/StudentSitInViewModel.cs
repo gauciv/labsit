@@ -140,6 +140,15 @@ namespace LaboratorySitInSystem.ViewModels
                     System.Diagnostics.Debug.WriteLine($"[SITIN] DENIED: No active schedule at current time");
                     return;
                 }
+
+                // Check if student has ended their session early for this subject today
+                var hasEndedEarly = _sessionRepo.HasEndedSessionEarlyToday(StudentIdInput, schedule.SubjectName, now);
+                if (hasEndedEarly)
+                {
+                    StatusMessage = $"Access denied. You have already ended your session early for {schedule.SubjectName} today and cannot rejoin.";
+                    System.Diagnostics.Debug.WriteLine($"[SITIN] DENIED: Student ended session early for {schedule.SubjectName} today");
+                    return;
+                }
                 
                 System.Diagnostics.Debug.WriteLine($"[SITIN] ACCESS GRANTED: {schedule.SubjectName}");
                 MatchedSchedule = schedule;
