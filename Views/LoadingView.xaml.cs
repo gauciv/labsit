@@ -32,13 +32,13 @@ namespace LaboratorySitInSystem.Views
 
                 // Method 1: Relative to executable
                 string exePath = AppDomain.CurrentDomain.BaseDirectory;
-                string path1 = Path.Combine(exePath, "LoadingVideo", "LabSit.mp4");
+                string path1 = Path.Combine(exePath, "Assets", "LabSit.mp4");
                 
                 // Method 2: Pack URI
-                string path2 = "pack://application:,,,/LoadingVideo/LabSit.mp4";
+                string path2 = "pack://application:,,,/Assets/LabSit.mp4";
                 
                 // Method 3: Relative path
-                string path3 = Path.GetFullPath(Path.Combine(exePath, "..", "..", "..", "LoadingVideo", "LabSit.mp4"));
+                string path3 = Path.GetFullPath(Path.Combine(exePath, "..", "..", "..", "Assets", "LabSit.mp4"));
 
                 if (File.Exists(path1))
                 {

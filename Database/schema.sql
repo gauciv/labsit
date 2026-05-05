@@ -33,17 +33,18 @@ CREATE TABLE IF NOT EXISTS `class_schedules` (
     FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Sit-in sessions table
-CREATE TABLE sitin_sessions (
-    session_id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id VARCHAR(20) NOT NULL,
-    subject_name VARCHAR(100),
-    start_time DATETIME NOT NULL,
-    end_time DATETIME NULL,
-    is_scheduled BOOLEAN NOT NULL DEFAULT FALSE,
-    early_ended BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE
-);
+-- Table: sitin_sessions
+CREATE TABLE IF NOT EXISTS `sitin_sessions` (
+    `session_id` INT AUTO_INCREMENT NOT NULL,
+    `student_id` VARCHAR(20) NOT NULL,
+    `subject_name` VARCHAR(100) DEFAULT NULL,
+    `start_time` DATETIME NOT NULL,
+    `end_time` DATETIME DEFAULT NULL,
+    `is_scheduled` TINYINT(1) NOT NULL DEFAULT 0,
+    `early_ended` TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`session_id`),
+    FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: admin_users
 CREATE TABLE IF NOT EXISTS `admin_users` (

@@ -16,7 +16,7 @@
 
             <!-- Logo and Brand -->
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="40,30,40,0">
-                <Image Source="/Images/labsit logo.jpg" 
+                <Image Source="/Assets/labsit logo.jpg" 
                        Width="50" 
                        Height="50" 
                        Margin="0,0,12,0"
@@ -222,7 +222,7 @@
                         Background="{StaticResource CardBgBrush}">
                     <Grid>
                         <!-- Laboratory Building Image -->
-                        <Image Source="/Images/ctu.jpg" 
+                        <Image Source="/Assets/ctu.jpg" 
                                Stretch="UniformToFill"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"/>
@@ -230,7 +230,7 @@
                         <!-- Fallback if image is not found -->
                         <Border Background="{StaticResource DarkCardBrush}"
                                 Visibility="Collapsed">
-                            <TextBlock Text="Laboratory Building&#x0a;&#x0a;Image not found:&#x0a;Images/ctu.jpg" 
+                            <TextBlock Text="Laboratory Building&#x0a;&#x0a;Image not found:&#x0a;Assets/ctu.jpg" 
                                        FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextOnDarkBrush}"

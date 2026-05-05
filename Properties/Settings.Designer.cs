@@ -58,5 +58,65 @@ namespace LaboratorySitInSystem.Properties {
                 this["RememberMe"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int AutoLogoutDuration {
+            get {
+                return ((int)(this["AutoLogoutDuration"]));
+            }
+            set {
+                this["AutoLogoutDuration"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public int DashboardRefreshInterval {
+            get {
+                return ((int)(this["DashboardRefreshInterval"]));
+            }
+            set {
+                this["DashboardRefreshInterval"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnableSoundNotifications {
+            get {
+                return ((bool)(this["EnableSoundNotifications"]));
+            }
+            set {
+                this["EnableSoundNotifications"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool RequireStudentId {
+            get {
+                return ((bool)(this["RequireStudentId"]));
+            }
+            set {
+                this["RequireStudentId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowSessionHistory {
+            get {
+                return ((bool)(this["ShowSessionHistory"]));
+            }
+            set {
+                this["ShowSessionHistory"] = value;
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace LaboratorySitInSystem.ViewModels
             get
             {
                 // Try multiple extensions
-                var basePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", "Members");
+                var basePath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "Members");
                 var fileNameWithoutExt = Path.GetFileNameWithoutExtension(ImageFileName);
                 
                 // Check for common image extensions

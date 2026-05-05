@@ -143,8 +143,8 @@ namespace LaboratorySitInSystem.Views
                 // Try multiple base paths
                 string[] basePaths = 
                 {
-                    Path.Combine(Directory.GetCurrentDirectory(), "Images", "Members"),
-                    Path.Combine(Directory.GetCurrentDirectory(), "Resources", "Images", "Members")
+                    Path.Combine(Directory.GetCurrentDirectory(), "Assets", "Members"),
+                    Path.Combine(Directory.GetCurrentDirectory(), "Resources", "Assets", "Members")
                 };
                 
                 foreach (var basePath in basePaths)

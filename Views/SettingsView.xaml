@@ -272,7 +272,7 @@
                             </StackPanel>
                             
                             <CheckBox Grid.Column="1"
-                                      IsChecked="True"
+                                      IsChecked="{Binding EnableSoundNotifications}"
                                       HorizontalAlignment="Right"
                                       VerticalAlignment="Center"
                                       Margin="20,0,0,0"/>
@@ -319,7 +319,7 @@
                             </StackPanel>
                             
                             <TextBox Grid.Column="1"
-                                     Text="1" 
+                                     Text="{Binding AutoLogoutDuration, UpdateSourceTrigger=PropertyChanged}" 
                                      Padding="12,8" 
                                      FontSize="14"
                                      Background="{StaticResource CardBgSoftBrush}"
@@ -374,7 +374,7 @@
                             </StackPanel>
                             
                             <CheckBox Grid.Column="1"
-                                      IsChecked="True"
+                                      IsChecked="{Binding RequireStudentId}"
                                       HorizontalAlignment="Right"
                                       VerticalAlignment="Center"
                                       Margin="20,0,0,0"/>
@@ -421,7 +421,7 @@
                             </StackPanel>
                             
                             <TextBox Grid.Column="1"
-                                     Text="30" 
+                                     Text="{Binding DashboardRefreshInterval, UpdateSourceTrigger=PropertyChanged}" 
                                      Padding="12,8" 
                                      FontSize="14"
                                      Background="{StaticResource CardBgSoftBrush}"
@@ -476,7 +476,7 @@
                             </StackPanel>
                             
                             <CheckBox Grid.Column="1"
-                                      IsChecked="True"
+                                      IsChecked="{Binding ShowSessionHistory}"
                                       HorizontalAlignment="Right"
                                       VerticalAlignment="Center"
                                       Margin="20,0,0,0"/>

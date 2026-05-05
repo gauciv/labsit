@@ -27,7 +27,7 @@
                     VerticalAlignment="Bottom"
                     Margin="0,0,0,60"
                     Visibility="Collapsed">
-            <Image Source="/Images/labsit logo.jpg" 
+            <Image Source="/Assets/labsit logo.jpg" 
                    Width="60" 
                    Height="60" 
                    Margin="0,0,0,16"

@@ -29,12 +29,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Images\labsit logo.jpg" />
-    <Resource Include="Images\ctu.jpg" />
+    <Resource Include="Assets\labsit logo.jpg" />
+    <Resource Include="Assets\ctu.jpg" />
+    <Resource Include="Assets\Members\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="LoadingVideo\LabSit.mp4">
+    <Content Include="Assets\LabSit.mp4">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

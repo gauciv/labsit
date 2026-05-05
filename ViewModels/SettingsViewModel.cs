@@ -8,12 +8,12 @@ namespace LaboratorySitInSystem.ViewModels
     {
         private readonly ISettingsRepository _settingsRepo;
 
-        // Default values
-        private const int DEFAULT_ALARM_THRESHOLD = 30;
-        private const int DEFAULT_AUTO_LOGOUT_DURATION = 1;
-        private const int DEFAULT_DASHBOARD_REFRESH_INTERVAL = 30;
-
         private int _alarmThreshold;
+        private int _autoLogoutDuration;
+        private int _dashboardRefreshInterval;
+        private bool _enableSoundNotifications;
+        private bool _requireStudentId;
+        private bool _showSessionHistory;
         private string _statusMessage;
         private bool _isSaveSuccess;
 
@@ -21,6 +21,36 @@ namespace LaboratorySitInSystem.ViewModels
         {
             get => _alarmThreshold;
             set => SetProperty(ref _alarmThreshold, value);
+        }
+
+        public int AutoLogoutDuration
+        {
+            get => _autoLogoutDuration;
+            set => SetProperty(ref _autoLogoutDuration, value);
+        }
+
+        public int DashboardRefreshInterval
+        {
+            get => _dashboardRefreshInterval;
+            set => SetProperty(ref _dashboardRefreshInterval, value);
+        }
+
+        public bool EnableSoundNotifications
+        {
+            get => _enableSoundNotifications;
+            set => SetProperty(ref _enableSoundNotifications, value);
+        }
+
+        public bool RequireStudentId
+        {
+            get => _requireStudentId;
+            set => SetProperty(ref _requireStudentId, value);
+        }
+
+        public bool ShowSessionHistory
+        {
+            get => _showSessionHistory;
+            set => SetProperty(ref _showSessionHistory, value);
         }
 
         public string StatusMessage
@@ -52,11 +82,20 @@ namespace LaboratorySitInSystem.ViewModels
         {
             try
             {
+                // Load alarm threshold from database
                 var settings = _settingsRepo.GetSettings();
                 if (settings != null)
                 {
                     AlarmThreshold = settings.AlarmThreshold;
                 }
+
+                // Load local preferences from app settings
+                var appSettings = Properties.Settings.Default;
+                AutoLogoutDuration = appSettings.AutoLogoutDuration;
+                DashboardRefreshInterval = appSettings.DashboardRefreshInterval;
+                EnableSoundNotifications = appSettings.EnableSoundNotifications;
+                RequireStudentId = appSettings.RequireStudentId;
+                ShowSessionHistory = appSettings.ShowSessionHistory;
             }
             catch (Exception ex)
             {
@@ -67,14 +106,44 @@ namespace LaboratorySitInSystem.ViewModels
 
         private void ExecuteSave(object parameter)
         {
-            _settingsRepo.UpdateAlarmThreshold(AlarmThreshold);
-            StatusMessage = "Settings saved successfully.";
+            try
+            {
+                // Persist alarm threshold to database
+                _settingsRepo.UpdateAlarmThreshold(AlarmThreshold);
+
+                // Persist local preferences
+                var appSettings = Properties.Settings.Default;
+                appSettings.AutoLogoutDuration = AutoLogoutDuration;
+                appSettings.DashboardRefreshInterval = DashboardRefreshInterval;
+                appSettings.EnableSoundNotifications = EnableSoundNotifications;
+                appSettings.RequireStudentId = RequireStudentId;
+                appSettings.ShowSessionHistory = ShowSessionHistory;
+                appSettings.Save();
+
+                StatusMessage = "Settings saved successfully.";
+                IsSaveSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Failed to save settings: {ex.Message}";
+                IsSaveSuccess = false;
+            }
         }
 
         private void ExecuteResetToDefaults(object parameter)
         {
-            AlarmThreshold = DEFAULT_ALARM_THRESHOLD;
-            StatusMessage = "Settings reset to default values.";
+            AlarmThreshold = 30;
+            AutoLogoutDuration = 1;
+            DashboardRefreshInterval = 30;
+            EnableSoundNotifications = true;
+            RequireStudentId = true;
+            ShowSessionHistory = true;
+
+            ExecuteSave(null);
+            if (IsSaveSuccess)
+            {
+                StatusMessage = "Settings reset to defaults and saved.";
+            }
         }
     }
 }
