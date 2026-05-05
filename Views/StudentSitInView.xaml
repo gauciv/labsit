@@ -244,9 +244,9 @@
             </Border>
         </Grid>
 
-        <!-- Pending Approval Modal Overlay -->
+        <!-- Status Modal Overlay (Pending / Rejected / Force Ended) -->
         <Grid Grid.ColumnSpan="2"
-              Visibility="{Binding ShowPendingModal, Converter={StaticResource BoolToVisibility}}">
+              Visibility="{Binding ShowModal, Converter={StaticResource BoolToVisibility}}">
             <!-- Dark backdrop -->
             <Border Background="#80000000"/>
             
@@ -261,16 +261,17 @@
                     <DropShadowEffect BlurRadius="30" ShadowDepth="4" Opacity="0.2" Color="#000000"/>
                 </Border.Effect>
                 <StackPanel HorizontalAlignment="Center">
-                    <Border Background="#FEF3C7" Width="72" Height="72" CornerRadius="36"
+                    <Border Width="72" Height="72" CornerRadius="36"
+                            Background="{Binding ModalIconBg}"
                             HorizontalAlignment="Center" Margin="0,0,0,20">
-                        <TextBlock Text="⏳" FontSize="32" 
+                        <TextBlock Text="{Binding ModalIcon}" FontSize="32" 
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    <TextBlock Text="Pending Approval"
+                    <TextBlock Text="{Binding ModalTitle}"
                                FontSize="22" FontWeight="Bold"
                                Foreground="{StaticResource TextPrimaryBrush}"
                                HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                    <TextBlock Text="Your sit-in request has been submitted. Please wait for admin approval before you can access the laboratory."
+                    <TextBlock Text="{Binding ModalMessage}"
                                FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
                                TextWrapping="Wrap" TextAlignment="Center"
                                MaxWidth="320" Margin="0,0,0,20"/>
@@ -278,18 +279,19 @@
                             Padding="16,12" Margin="0,0,0,20">
                         <StackPanel>
                             <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
-                                <Run Text="Student: "/><Run Text="{Binding PendingStudentName, Mode=OneWay}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <Run Text="Student: "/><Run Text="{Binding ModalStudentName, Mode=OneWay}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </TextBlock>
                             <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0">
-                                <Run Text="Subject: "/><Run Text="{Binding PendingSubject, Mode=OneWay}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <Run Text="Subject: "/><Run Text="{Binding ModalSubject, Mode=OneWay}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </TextBlock>
-                            <TextBlock Text="Status: Waiting for admin..."
+                            <TextBlock Text="{Binding ModalStatusText}"
                                        FontSize="12" FontStyle="Italic"
-                                       Foreground="#D97706" Margin="0,8,0,0"/>
+                                       Foreground="{Binding ModalStatusColor}"
+                                       Margin="0,8,0,0"/>
                         </StackPanel>
                     </Border>
-                    <Button Content="OK, I'll wait"
-                            Command="{Binding DismissPendingCommand}"
+                    <Button Content="OK"
+                            Command="{Binding DismissModalCommand}"
                             Background="{StaticResource PrimaryBrush}"
                             Foreground="{StaticResource TextOnDarkBrush}"
                             BorderThickness="0" Padding="24,12"

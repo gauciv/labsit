@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Windows.Media;
 using LaboratorySitInSystem.DataAccess;
 using LaboratorySitInSystem.Helpers;
 using LaboratorySitInSystem.Models;
@@ -16,9 +17,15 @@ namespace LaboratorySitInSystem.ViewModels
         private Student _currentStudent;
         private ClassSchedule _matchedSchedule;
         private string _statusMessage;
-        private bool _showPendingModal;
-        private string _pendingStudentName;
-        private string _pendingSubject;
+        private bool _showModal;
+        private string _modalTitle;
+        private string _modalMessage;
+        private string _modalStudentName;
+        private string _modalSubject;
+        private string _modalStatusText;
+        private Brush _modalStatusColor;
+        private Brush _modalIconBg;
+        private string _modalIcon;
 
         public string StudentIdInput
         {
@@ -44,27 +51,63 @@ namespace LaboratorySitInSystem.ViewModels
             set => SetProperty(ref _statusMessage, value);
         }
 
-        public bool ShowPendingModal
+        public bool ShowModal
         {
-            get => _showPendingModal;
-            set => SetProperty(ref _showPendingModal, value);
+            get => _showModal;
+            set => SetProperty(ref _showModal, value);
         }
 
-        public string PendingStudentName
+        public string ModalTitle
         {
-            get => _pendingStudentName;
-            set => SetProperty(ref _pendingStudentName, value);
+            get => _modalTitle;
+            set => SetProperty(ref _modalTitle, value);
         }
 
-        public string PendingSubject
+        public string ModalMessage
         {
-            get => _pendingSubject;
-            set => SetProperty(ref _pendingSubject, value);
+            get => _modalMessage;
+            set => SetProperty(ref _modalMessage, value);
+        }
+
+        public string ModalStudentName
+        {
+            get => _modalStudentName;
+            set => SetProperty(ref _modalStudentName, value);
+        }
+
+        public string ModalSubject
+        {
+            get => _modalSubject;
+            set => SetProperty(ref _modalSubject, value);
+        }
+
+        public string ModalStatusText
+        {
+            get => _modalStatusText;
+            set => SetProperty(ref _modalStatusText, value);
+        }
+
+        public Brush ModalStatusColor
+        {
+            get => _modalStatusColor;
+            set => SetProperty(ref _modalStatusColor, value);
+        }
+
+        public Brush ModalIconBg
+        {
+            get => _modalIconBg;
+            set => SetProperty(ref _modalIconBg, value);
+        }
+
+        public string ModalIcon
+        {
+            get => _modalIcon;
+            set => SetProperty(ref _modalIcon, value);
         }
 
         public RelayCommand LoginCommand { get; }
         public RelayCommand GoBackCommand { get; }
-        public RelayCommand DismissPendingCommand { get; }
+        public RelayCommand DismissModalCommand { get; }
 
         public StudentSitInViewModel(
             IStudentRepository studentRepo,
@@ -77,7 +120,7 @@ namespace LaboratorySitInSystem.ViewModels
 
             LoginCommand = new RelayCommand(ExecuteLogin);
             GoBackCommand = new RelayCommand(ExecuteGoBack);
-            DismissPendingCommand = new RelayCommand(ExecuteDismissPending);
+            DismissModalCommand = new RelayCommand(ExecuteDismissModal);
         }
 
         private void ExecuteLogin(object parameter)
@@ -118,10 +161,7 @@ namespace LaboratorySitInSystem.ViewModels
                 var pendingSession = _sessionRepo.GetPendingSessionByStudent(StudentIdInput);
                 if (pendingSession != null)
                 {
-                    // Already pending — show the pending modal again
-                    PendingStudentName = student.FullName;
-                    PendingSubject = pendingSession.SubjectName;
-                    ShowPendingModal = true;
+                    ShowPendingModalState(student.FullName, pendingSession.SubjectName);
                     return;
                 }
 
@@ -143,7 +183,7 @@ namespace LaboratorySitInSystem.ViewModels
                     var todaySchedules = _scheduleRepo.GetTodaySchedules(StudentIdInput, currentDay);
                     if (todaySchedules.Count > 0)
                     {
-                        var scheduleList = string.Join(", ", todaySchedules.Select(s => 
+                        var scheduleList = string.Join(", ", todaySchedules.Select(s =>
                             $"{s.SubjectName} ({s.StartTime:hh\\:mm}-{s.EndTime:hh\\:mm})"));
                         StatusMessage = $"Access denied. Current time ({currentTime:hh\\:mm}) does not fall within your scheduled classes today.\n\nToday's schedules: {scheduleList}";
                     }
@@ -151,6 +191,22 @@ namespace LaboratorySitInSystem.ViewModels
                     {
                         StatusMessage = $"Access denied. You have no scheduled classes today ({currentDay}).";
                     }
+                    return;
+                }
+
+                // Check if student was rejected for this schedule today
+                var rejectedSession = _sessionRepo.GetRejectedSessionToday(StudentIdInput, schedule.SubjectName, now);
+                if (rejectedSession != null)
+                {
+                    ShowRejectedModalState(student.FullName, schedule.SubjectName);
+                    return;
+                }
+
+                // Check if student was force-ended for this schedule today
+                var forceEndedSession = _sessionRepo.GetForceEndedSessionToday(StudentIdInput, schedule.SubjectName, now);
+                if (forceEndedSession != null)
+                {
+                    ShowForceEndedModalState(student.FullName, schedule.SubjectName);
                     return;
                 }
 
@@ -178,10 +234,7 @@ namespace LaboratorySitInSystem.ViewModels
                 _sessionRepo.StartSession(session);
                 SessionEventHub.NotifySessionStarted(StudentIdInput);
 
-                // Show pending modal
-                PendingStudentName = student.FullName;
-                PendingSubject = schedule.SubjectName;
-                ShowPendingModal = true;
+                ShowPendingModalState(student.FullName, schedule.SubjectName);
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
             {
@@ -193,9 +246,48 @@ namespace LaboratorySitInSystem.ViewModels
             }
         }
 
-        private void ExecuteDismissPending(object parameter)
+        private void ShowPendingModalState(string studentName, string subject)
         {
-            ShowPendingModal = false;
+            ModalIcon = "⏳";
+            ModalIconBg = (Brush)new BrushConverter().ConvertFrom("#FEF3C7");
+            ModalTitle = "Pending Approval";
+            ModalMessage = "Your sit-in request has been submitted. Please wait for admin approval before you can access the laboratory.";
+            ModalStudentName = studentName;
+            ModalSubject = subject;
+            ModalStatusText = "Status: Waiting for admin...";
+            ModalStatusColor = (Brush)new BrushConverter().ConvertFrom("#D97706");
+            ShowModal = true;
+        }
+
+        private void ShowRejectedModalState(string studentName, string subject)
+        {
+            ModalIcon = "🚫";
+            ModalIconBg = (Brush)new BrushConverter().ConvertFrom("#FEE2E2");
+            ModalTitle = "Request Rejected";
+            ModalMessage = "Your sit-in request has been rejected by the admin. You are not allowed to enter the laboratory for this schedule today.";
+            ModalStudentName = studentName;
+            ModalSubject = subject;
+            ModalStatusText = "Status: Rejected by admin";
+            ModalStatusColor = (Brush)new BrushConverter().ConvertFrom("#DC2626");
+            ShowModal = true;
+        }
+
+        private void ShowForceEndedModalState(string studentName, string subject)
+        {
+            ModalIcon = "⛔";
+            ModalIconBg = (Brush)new BrushConverter().ConvertFrom("#FEE2E2");
+            ModalTitle = "Session Forcefully Closed";
+            ModalMessage = "Your session was forcefully ended by the admin. You are not allowed to re-enter the laboratory for this schedule today.";
+            ModalStudentName = studentName;
+            ModalSubject = subject;
+            ModalStatusText = "Status: Forcefully ended by admin";
+            ModalStatusColor = (Brush)new BrushConverter().ConvertFrom("#DC2626");
+            ShowModal = true;
+        }
+
+        private void ExecuteDismissModal(object parameter)
+        {
+            ShowModal = false;
         }
 
         private void ExecuteGoBack(object parameter)

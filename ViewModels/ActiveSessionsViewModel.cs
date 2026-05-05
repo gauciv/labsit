@@ -173,14 +173,21 @@ namespace LaboratorySitInSystem.ViewModels
         {
             if (SelectedSession == null) return;
 
-            _sessionRepo.EndSession(SelectedSession.SessionId, DateTime.Now);
-            StatusMessage = $"Session for {SelectedSession.StudentName} ended.";
-            
-            // Notify that a session was ended
-            SessionEventHub.NotifySessionEnded(SelectedSession.StudentId);
-            
-            SelectedSession = null;
-            RefreshAndCheckSessions();
+            var result = System.Windows.MessageBox.Show(
+                $"Are you sure you want to force end the session for {SelectedSession.StudentName}?\n\n" +
+                "The student will be notified and will not be able to rejoin this schedule today.",
+                "Force End Session",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            if (result == System.Windows.MessageBoxResult.Yes)
+            {
+                _sessionRepo.ForceEndSession(SelectedSession.SessionId, DateTime.Now);
+                StatusMessage = $"Session for {SelectedSession.StudentName} forcefully ended.";
+                SessionEventHub.NotifySessionEnded(SelectedSession.StudentId);
+                SelectedSession = null;
+                RefreshAndCheckSessions();
+            }
         }
 
         private bool CanForceEndSession(object parameter)
@@ -208,9 +215,19 @@ namespace LaboratorySitInSystem.ViewModels
         {
             if (parameter is SitInSession session)
             {
-                _sessionRepo.RejectSession(session.SessionId);
-                StatusMessage = $"Rejected sit-in for {session.StudentName}.";
-                RefreshAndCheckSessions();
+                var result = System.Windows.MessageBox.Show(
+                    $"Are you sure you want to reject the sit-in request for {session.StudentName}?\n\n" +
+                    "The student will be blocked from entering this schedule today.",
+                    "Reject Sit-In Request",
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Question);
+
+                if (result == System.Windows.MessageBoxResult.Yes)
+                {
+                    _sessionRepo.RejectSession(session.SessionId);
+                    StatusMessage = $"Rejected sit-in for {session.StudentName}.";
+                    RefreshAndCheckSessions();
+                }
             }
         }
     }

@@ -266,5 +266,57 @@ namespace LaboratorySitInSystem.DataAccess
             command.Parameters.AddWithValue("@sessionId", sessionId);
             command.ExecuteNonQuery();
         }
+
+        public SitInSession GetRejectedSessionToday(string studentId, string subjectName, DateTime today)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, s.status " +
+                "FROM sitin_sessions s " +
+                "JOIN students st ON s.student_id = st.student_id " +
+                "WHERE s.student_id = @studentId AND s.subject_name = @subjectName " +
+                "AND DATE(s.start_time) = DATE(@today) AND s.status = 'rejected' " +
+                "ORDER BY s.start_time DESC LIMIT 1",
+                connection);
+            command.Parameters.AddWithValue("@studentId", studentId);
+            command.Parameters.AddWithValue("@subjectName", subjectName);
+            command.Parameters.AddWithValue("@today", today);
+            using var reader = command.ExecuteReader();
+            return reader.Read() ? ReadSession(reader) : null;
+        }
+
+        public SitInSession GetForceEndedSessionToday(string studentId, string subjectName, DateTime today)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, s.status " +
+                "FROM sitin_sessions s " +
+                "JOIN students st ON s.student_id = st.student_id " +
+                "WHERE s.student_id = @studentId AND s.subject_name = @subjectName " +
+                "AND DATE(s.start_time) = DATE(@today) AND s.status = 'force_ended' " +
+                "ORDER BY s.start_time DESC LIMIT 1",
+                connection);
+            command.Parameters.AddWithValue("@studentId", studentId);
+            command.Parameters.AddWithValue("@subjectName", subjectName);
+            command.Parameters.AddWithValue("@today", today);
+            using var reader = command.ExecuteReader();
+            return reader.Read() ? ReadSession(reader) : null;
+        }
+
+        public void ForceEndSession(int sessionId, DateTime endTime)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "UPDATE sitin_sessions SET end_time = @endTime, status = 'force_ended' WHERE session_id = @sessionId",
+                connection);
+            command.Parameters.AddWithValue("@endTime", endTime);
+            command.Parameters.AddWithValue("@sessionId", sessionId);
+            command.ExecuteNonQuery();
+        }
     }
 }

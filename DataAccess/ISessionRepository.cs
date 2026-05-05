@@ -22,5 +22,8 @@ namespace LaboratorySitInSystem.DataAccess
         List<SitInSession> GetPendingSessions();
         void ApproveSession(int sessionId);
         void RejectSession(int sessionId);
+        SitInSession GetRejectedSessionToday(string studentId, string subjectName, DateTime today);
+        SitInSession GetForceEndedSessionToday(string studentId, string subjectName, DateTime today);
+        void ForceEndSession(int sessionId, DateTime endTime);
     }
 }
