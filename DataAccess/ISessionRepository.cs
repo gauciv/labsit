@@ -16,5 +16,11 @@ namespace LaboratorySitInSystem.DataAccess
         List<SitInSession> GetStudentRecentHistory(string studentId, int limit);
         void EndSessionEarly(int sessionId, DateTime endTime);
         bool HasEndedSessionEarlyToday(string studentId, string subjectName, DateTime currentDate);
+
+        // Approval system
+        SitInSession GetPendingSessionByStudent(string studentId);
+        List<SitInSession> GetPendingSessions();
+        void ApproveSession(int sessionId);
+        void RejectSession(int sessionId);
     }
 }

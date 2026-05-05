@@ -14,10 +14,10 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
             using var command = new MySqlCommand(
                 "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, s.status " +
                 "FROM sitin_sessions s " +
                 "JOIN students st ON s.student_id = st.student_id " +
-                "WHERE s.end_time IS NULL",
+                "WHERE s.end_time IS NULL AND s.status = 'approved'",
                 connection);
             using var reader = command.ExecuteReader();
             while (reader.Read())
@@ -33,10 +33,10 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
             using var command = new MySqlCommand(
                 "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, s.status " +
                 "FROM sitin_sessions s " +
                 "JOIN students st ON s.student_id = st.student_id " +
-                "WHERE s.end_time IS NULL AND s.student_id = @studentId",
+                "WHERE s.end_time IS NULL AND s.student_id = @studentId AND s.status = 'approved'",
                 connection);
             command.Parameters.AddWithValue("@studentId", studentId);
             using var reader = command.ExecuteReader();
@@ -50,7 +50,7 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
 
             var sql = "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                      "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
+                      "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, s.status " +
                       "FROM sitin_sessions s " +
                       "JOIN students st ON s.student_id = st.student_id " +
                       "WHERE s.end_time IS NOT NULL";
@@ -95,13 +95,14 @@ namespace LaboratorySitInSystem.DataAccess
             using var connection = DatabaseHelper.GetConnection();
             connection.Open();
             using var command = new MySqlCommand(
-                "INSERT INTO sitin_sessions (student_id, subject_name, start_time, is_scheduled) " +
-                "VALUES (@studentId, @subjectName, @startTime, @isScheduled)",
+                "INSERT INTO sitin_sessions (student_id, subject_name, start_time, is_scheduled, status) " +
+                "VALUES (@studentId, @subjectName, @startTime, @isScheduled, @status)",
                 connection);
             command.Parameters.AddWithValue("@studentId", session.StudentId);
             command.Parameters.AddWithValue("@subjectName", session.SubjectName);
             command.Parameters.AddWithValue("@startTime", session.StartTime);
             command.Parameters.AddWithValue("@isScheduled", session.IsScheduled);
+            command.Parameters.AddWithValue("@status", session.Status ?? "pending");
             command.ExecuteNonQuery();
         }
 
@@ -122,7 +123,7 @@ namespace LaboratorySitInSystem.DataAccess
             using var connection = DatabaseHelper.GetConnection();
             connection.Open();
             using var command = new MySqlCommand(
-                "SELECT COUNT(*) FROM sitin_sessions WHERE end_time IS NULL",
+                "SELECT COUNT(*) FROM sitin_sessions WHERE end_time IS NULL AND status = 'approved'",
                 connection);
             return Convert.ToInt32(command.ExecuteScalar());
         }
@@ -145,10 +146,10 @@ namespace LaboratorySitInSystem.DataAccess
             connection.Open();
             using var command = new MySqlCommand(
                 "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
-                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, s.status " +
                 "FROM sitin_sessions s " +
                 "JOIN students st ON s.student_id = st.student_id " +
-                "WHERE s.student_id = @studentId " +
+                "WHERE s.student_id = @studentId AND s.status = 'approved' " +
                 "ORDER BY s.start_time DESC LIMIT @limit",
                 connection);
             command.Parameters.AddWithValue("@studentId", studentId);
@@ -202,8 +203,68 @@ namespace LaboratorySitInSystem.DataAccess
                 StartTime = reader.GetDateTime("start_time"),
                 EndTime = reader.IsDBNull(reader.GetOrdinal("end_time")) ? null : reader.GetDateTime("end_time"),
                 IsScheduled = reader.GetBoolean("is_scheduled"),
-                EarlyEnded = !reader.IsDBNull(reader.GetOrdinal("early_ended")) && reader.GetBoolean("early_ended")
+                EarlyEnded = !reader.IsDBNull(reader.GetOrdinal("early_ended")) && reader.GetBoolean("early_ended"),
+                Status = reader.IsDBNull(reader.GetOrdinal("status")) ? "approved" : reader.GetString("status")
             };
+        }
+
+        public SitInSession GetPendingSessionByStudent(string studentId)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, s.status " +
+                "FROM sitin_sessions s " +
+                "JOIN students st ON s.student_id = st.student_id " +
+                "WHERE s.student_id = @studentId AND s.status = 'pending' AND s.end_time IS NULL",
+                connection);
+            command.Parameters.AddWithValue("@studentId", studentId);
+            using var reader = command.ExecuteReader();
+            return reader.Read() ? ReadSession(reader) : null;
+        }
+
+        public List<SitInSession> GetPendingSessions()
+        {
+            var sessions = new List<SitInSession>();
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "SELECT s.session_id, s.student_id, CONCAT(st.first_name, ' ', st.last_name) AS student_name, " +
+                "s.subject_name, s.start_time, s.end_time, s.is_scheduled, s.early_ended, s.status " +
+                "FROM sitin_sessions s " +
+                "JOIN students st ON s.student_id = st.student_id " +
+                "WHERE s.status = 'pending' AND s.end_time IS NULL " +
+                "ORDER BY s.start_time ASC",
+                connection);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                sessions.Add(ReadSession(reader));
+            }
+            return sessions;
+        }
+
+        public void ApproveSession(int sessionId)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "UPDATE sitin_sessions SET status = 'approved' WHERE session_id = @sessionId",
+                connection);
+            command.Parameters.AddWithValue("@sessionId", sessionId);
+            command.ExecuteNonQuery();
+        }
+
+        public void RejectSession(int sessionId)
+        {
+            using var connection = DatabaseHelper.GetConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "UPDATE sitin_sessions SET status = 'rejected', end_time = NOW() WHERE session_id = @sessionId",
+                connection);
+            command.Parameters.AddWithValue("@sessionId", sessionId);
+            command.ExecuteNonQuery();
         }
     }
 }

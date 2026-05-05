@@ -12,6 +12,10 @@ namespace LaboratorySitInSystem.Models
         public DateTime? EndTime { get; set; }
         public bool IsScheduled { get; set; }
         public bool EarlyEnded { get; set; }
+        public string Status { get; set; } // "pending", "approved", "rejected"
         public TimeSpan Duration => (EndTime ?? DateTime.Now) - StartTime;
+
+        public bool IsPending => Status == "pending";
+        public bool IsApproved => Status == "approved";
     }
 }

@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS `sitin_sessions` (
     `end_time` DATETIME DEFAULT NULL,
     `is_scheduled` TINYINT(1) NOT NULL DEFAULT 0,
     `early_ended` TINYINT(1) NOT NULL DEFAULT 0,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'approved',
     PRIMARY KEY (`session_id`),
     FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -21,8 +21,10 @@ namespace LaboratorySitInSystem.ViewModels
         private string _statusMessage;
 
         public ObservableCollection<SitInSession> ActiveSessions { get; }
+        public ObservableCollection<SitInSession> PendingSessions { get; }
 
         public bool IsEmpty => ActiveSessions.Count == 0;
+        public bool HasPendingSessions => PendingSessions.Count > 0;
 
         public SitInSession SelectedSession
         {
@@ -50,6 +52,8 @@ namespace LaboratorySitInSystem.ViewModels
 
         public RelayCommand ForceEndSessionCommand { get; }
         public RelayCommand RefreshCommand { get; }
+        public RelayCommand ApproveSessionCommand { get; }
+        public RelayCommand RejectSessionCommand { get; }
 
         public ActiveSessionsViewModel(
             ISessionRepository sessionRepo,
@@ -61,9 +65,12 @@ namespace LaboratorySitInSystem.ViewModels
             _scheduleRepo = scheduleRepo ?? throw new ArgumentNullException(nameof(scheduleRepo));
 
             ActiveSessions = new ObservableCollection<SitInSession>();
+            PendingSessions = new ObservableCollection<SitInSession>();
 
             ForceEndSessionCommand = new RelayCommand(ExecuteForceEndSession, CanForceEndSession);
             RefreshCommand = new RelayCommand(ExecuteRefresh);
+            ApproveSessionCommand = new RelayCommand(ExecuteApproveSession);
+            RejectSessionCommand = new RelayCommand(ExecuteRejectSession);
 
             // Subscribe to session change events
             SessionEventHub.SessionChanged += OnSessionChanged;
@@ -107,6 +114,20 @@ namespace LaboratorySitInSystem.ViewModels
                 ActiveSessions.Add(session);
             }
             OnPropertyChanged(nameof(IsEmpty));
+
+            // Also load pending sessions
+            LoadPendingSessions();
+        }
+
+        private void LoadPendingSessions()
+        {
+            var pending = _sessionRepo.GetPendingSessions();
+            PendingSessions.Clear();
+            foreach (var session in pending)
+            {
+                PendingSessions.Add(session);
+            }
+            OnPropertyChanged(nameof(HasPendingSessions));
         }
 
         private void CheckAlarmThreshold()
@@ -170,6 +191,27 @@ namespace LaboratorySitInSystem.ViewModels
         private void ExecuteRefresh(object parameter)
         {
             RefreshAndCheckSessions();
+        }
+
+        private void ExecuteApproveSession(object parameter)
+        {
+            if (parameter is SitInSession session)
+            {
+                _sessionRepo.ApproveSession(session.SessionId);
+                StatusMessage = $"Approved sit-in for {session.StudentName}.";
+                SessionEventHub.NotifySessionStarted(session.StudentId);
+                RefreshAndCheckSessions();
+            }
+        }
+
+        private void ExecuteRejectSession(object parameter)
+        {
+            if (parameter is SitInSession session)
+            {
+                _sessionRepo.RejectSession(session.SessionId);
+                StatusMessage = $"Rejected sit-in for {session.StudentName}.";
+                RefreshAndCheckSessions();
+            }
         }
     }
 }

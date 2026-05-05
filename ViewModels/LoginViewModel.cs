@@ -165,6 +165,9 @@ namespace LaboratorySitInSystem.ViewModels
                 var scheduleRepo = new ScheduleRepository();
                 var sessionRepo = new SessionRepository();
 
+                // Check if there's a recently approved session waiting to enter dashboard
+                // This handles the case where admin approved while student was on login screen
+                // The student will still need to enter their ID on the sit-in screen
                 MainViewModel.Instance.NavigateTo(new StudentSitInViewModel(
                     studentRepo, scheduleRepo, sessionRepo));
             }

@@ -151,6 +151,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -283,8 +284,86 @@
             </Grid>
         </Border>
 
+        <!-- Pending Requests Section -->
+        <Border Grid.Row="2"
+                Background="{StaticResource CardBgBrush}"
+                CornerRadius="12"
+                BorderThickness="1"
+                BorderBrush="#F59E0B"
+                Margin="0,0,0,24"
+                Padding="24,20"
+                Visibility="{Binding HasPendingSessions, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <TextBlock Text="⏳" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Pending Sit-In Requests" FontSize="16" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <ItemsControl ItemsSource="{Binding PendingSessions}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{StaticResource CardBgSoftBrush}" CornerRadius="8"
+                                    Padding="16,12" Margin="0,0,0,8"
+                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                        <TextBlock FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   Text="{Binding StudentName}"/>
+                                        <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0">
+                                            <Run Text="Subject: "/><Run Text="{Binding SubjectName, Mode=OneWay}"/>
+                                            <Run Text=" | ID: "/><Run Text="{Binding StudentId, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Content="✓ Approve"
+                                                Command="{Binding DataContext.ApproveSessionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Background="#10B981" Foreground="White"
+                                                BorderThickness="0" Padding="14,8"
+                                                FontSize="12" FontWeight="SemiBold" Cursor="Hand" Margin="0,0,8,0">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                        <Button Content="✕ Reject"
+                                                Command="{Binding DataContext.RejectSessionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Background="#EF4444" Foreground="White"
+                                                BorderThickness="0" Padding="14,8"
+                                                FontSize="12" FontWeight="SemiBold" Cursor="Hand">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
         <!-- Sessions Table Card -->
-        <Border Grid.Row="2" 
+        <Border Grid.Row="3" 
                 Background="{StaticResource CardBgBrush}"
                 CornerRadius="12"
                 BorderThickness="1"

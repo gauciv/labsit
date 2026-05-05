@@ -230,7 +230,10 @@ namespace LaboratorySitInSystem.ViewModels
                     TimeRemainingDisplay = "00:00:00";
                     SessionWarning = "Your session time has ended.";
                     ShowWarning = true;
-                    System.Diagnostics.Debug.WriteLine($"[TIME_UPDATE] Session ended");
+                    System.Diagnostics.Debug.WriteLine($"[TIME_UPDATE] Session ended - force exiting");
+                    
+                    // Force end the session and navigate back to login
+                    ForceEndSession();
                 }
                 else
                 {
@@ -316,6 +319,31 @@ namespace LaboratorySitInSystem.ViewModels
                     StatusMessage = $"Failed to end session: {ex.Message}";
                     System.Diagnostics.Debug.WriteLine($"[END SESSION ERROR] {ex}");
                 }
+            }
+        }
+
+        private void ForceEndSession()
+        {
+            try
+            {
+                _timer?.Dispose();
+                _sessionRepo.EndSession(ActiveSession.SessionId, DateTime.Now);
+                SessionEventHub.NotifySessionEnded(Student.StudentId);
+
+                Application.Current?.Dispatcher?.Invoke(() =>
+                {
+                    MessageBox.Show(
+                        "Your scheduled session time has ended. You have been logged out automatically.",
+                        "Session Ended",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+
+                    MainViewModel.Instance.NavigateTo(new LoginViewModel(new AdminRepository()));
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[FORCE END ERROR] {ex}");
             }
         }
 

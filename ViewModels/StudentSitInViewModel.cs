@@ -16,6 +16,9 @@ namespace LaboratorySitInSystem.ViewModels
         private Student _currentStudent;
         private ClassSchedule _matchedSchedule;
         private string _statusMessage;
+        private bool _showPendingModal;
+        private string _pendingStudentName;
+        private string _pendingSubject;
 
         public string StudentIdInput
         {
@@ -41,8 +44,27 @@ namespace LaboratorySitInSystem.ViewModels
             set => SetProperty(ref _statusMessage, value);
         }
 
+        public bool ShowPendingModal
+        {
+            get => _showPendingModal;
+            set => SetProperty(ref _showPendingModal, value);
+        }
+
+        public string PendingStudentName
+        {
+            get => _pendingStudentName;
+            set => SetProperty(ref _pendingStudentName, value);
+        }
+
+        public string PendingSubject
+        {
+            get => _pendingSubject;
+            set => SetProperty(ref _pendingSubject, value);
+        }
+
         public RelayCommand LoginCommand { get; }
         public RelayCommand GoBackCommand { get; }
+        public RelayCommand DismissPendingCommand { get; }
 
         public StudentSitInViewModel(
             IStudentRepository studentRepo,
@@ -55,6 +77,7 @@ namespace LaboratorySitInSystem.ViewModels
 
             LoginCommand = new RelayCommand(ExecuteLogin);
             GoBackCommand = new RelayCommand(ExecuteGoBack);
+            DismissPendingCommand = new RelayCommand(ExecuteDismissPending);
         }
 
         private void ExecuteLogin(object parameter)
@@ -79,13 +102,11 @@ namespace LaboratorySitInSystem.ViewModels
                 }
 
                 CurrentStudent = student;
-                System.Diagnostics.Debug.WriteLine($"[SITIN] Student found: {student.FullName} ({student.StudentId})");
 
+                // Check if student has an approved active session — go straight to dashboard
                 var activeSession = _sessionRepo.GetActiveSessionByStudent(StudentIdInput);
                 if (activeSession != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[SITIN] Student already has active session");
-                    // Student already has an active session — show their dashboard
                     var existingSchedule = _scheduleRepo.GetActiveSchedule(
                         StudentIdInput, DateTime.Now.DayOfWeek, DateTime.Now.TimeOfDay);
                     MainViewModel.Instance.NavigateTo(new StudentSessionDashboardViewModel(
@@ -93,103 +114,93 @@ namespace LaboratorySitInSystem.ViewModels
                     return;
                 }
 
+                // Check if student already has a pending request
+                var pendingSession = _sessionRepo.GetPendingSessionByStudent(StudentIdInput);
+                if (pendingSession != null)
+                {
+                    // Already pending — show the pending modal again
+                    PendingStudentName = student.FullName;
+                    PendingSubject = pendingSession.SubjectName;
+                    ShowPendingModal = true;
+                    return;
+                }
+
+                // Validate schedule
                 var now = DateTime.Now;
                 var currentDay = now.DayOfWeek;
                 var currentTime = now.TimeOfDay;
-                
-                System.Diagnostics.Debug.WriteLine($"[SITIN] Current time: {currentDay} {currentTime:hh\\:mm\\:ss}");
-                
-                // Check if student has any schedules at all
+
                 var allSchedules = _scheduleRepo.GetByStudentId(StudentIdInput);
-                System.Diagnostics.Debug.WriteLine($"[SITIN] Student has {allSchedules?.Count ?? 0} total schedules");
-                
-                // If student has no schedules, they cannot sit in
                 if (allSchedules == null || allSchedules.Count == 0)
                 {
                     StatusMessage = "Access denied. You have no class schedules registered in the system.";
-                    System.Diagnostics.Debug.WriteLine($"[SITIN] DENIED: No schedules found");
                     return;
                 }
-                
-                // Log all student's schedules for debugging
-                foreach (var sched in allSchedules)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[SITIN] Schedule: {sched.SubjectName} on {sched.DayOfWeek} from {sched.StartTime} to {sched.EndTime}");
-                }
-                
-                // Check if current time matches any schedule
+
                 var schedule = _scheduleRepo.GetActiveSchedule(StudentIdInput, currentDay, currentTime);
-                System.Diagnostics.Debug.WriteLine($"[SITIN] Active schedule found: {schedule?.SubjectName ?? "None"}");
-                
-                // If student has schedules but current time doesn't match any, they cannot sit in
                 if (schedule == null)
                 {
-                    // Get today's schedules to show in error message
                     var todaySchedules = _scheduleRepo.GetTodaySchedules(StudentIdInput, currentDay);
-                    
                     if (todaySchedules.Count > 0)
                     {
-                        var scheduleList = string.Join(", ", todaySchedules.Select(s => $"{s.SubjectName} ({s.StartTime:hh\\:mm}-{s.EndTime:hh\\:mm})"));
+                        var scheduleList = string.Join(", ", todaySchedules.Select(s => 
+                            $"{s.SubjectName} ({s.StartTime:hh\\:mm}-{s.EndTime:hh\\:mm})"));
                         StatusMessage = $"Access denied. Current time ({currentTime:hh\\:mm}) does not fall within your scheduled classes today.\n\nToday's schedules: {scheduleList}";
                     }
                     else
                     {
                         StatusMessage = $"Access denied. You have no scheduled classes today ({currentDay}).";
                     }
-                    
-                    System.Diagnostics.Debug.WriteLine($"[SITIN] DENIED: No active schedule at current time");
                     return;
                 }
 
-                // Check if student has ended their session early for this subject today
+                // Check if student ended early today
                 var hasEndedEarly = _sessionRepo.HasEndedSessionEarlyToday(StudentIdInput, schedule.SubjectName, now);
                 if (hasEndedEarly)
                 {
                     StatusMessage = $"Access denied. You have already ended your session early for {schedule.SubjectName} today and cannot rejoin.";
-                    System.Diagnostics.Debug.WriteLine($"[SITIN] DENIED: Student ended session early for {schedule.SubjectName} today");
                     return;
                 }
-                
-                System.Diagnostics.Debug.WriteLine($"[SITIN] ACCESS GRANTED: {schedule.SubjectName}");
+
                 MatchedSchedule = schedule;
 
+                // Create a PENDING session — requires admin approval
                 var session = new SitInSession
                 {
                     StudentId = StudentIdInput,
                     StudentName = student.FullName,
                     SubjectName = schedule.SubjectName,
                     StartTime = now,
-                    IsScheduled = true
+                    IsScheduled = true,
+                    Status = "pending"
                 };
 
                 _sessionRepo.StartSession(session);
-
-                // Notify that a session was created
                 SessionEventHub.NotifySessionStarted(StudentIdInput);
 
-                // Fetch the session back to get the auto-generated SessionId
-                var startedSession = _sessionRepo.GetActiveSessionByStudent(StudentIdInput);
-
-                // Navigate to the session dashboard
-                MainViewModel.Instance.NavigateTo(new StudentSessionDashboardViewModel(
-                    student, startedSession, schedule, _sessionRepo, _scheduleRepo, _studentRepo));
+                // Show pending modal
+                PendingStudentName = student.FullName;
+                PendingSubject = schedule.SubjectName;
+                ShowPendingModal = true;
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
             {
                 StatusMessage = $"Database connection failed. Is XAMPP MySQL running?\n\nDetails: {ex.Message}";
-                System.Diagnostics.Debug.WriteLine($"[SITIN ERROR] MySqlException: {ex}");
             }
             catch (Exception ex)
             {
                 StatusMessage = $"An unexpected error occurred: {ex.Message}";
-                System.Diagnostics.Debug.WriteLine($"[SITIN ERROR] Exception: {ex}");
             }
+        }
+
+        private void ExecuteDismissPending(object parameter)
+        {
+            ShowPendingModal = false;
         }
 
         private void ExecuteGoBack(object parameter)
         {
-            MainViewModel.Instance.NavigateTo(new LoginViewModel(
-                new AdminRepository()));
+            MainViewModel.Instance.NavigateTo(new LoginViewModel(new AdminRepository()));
         }
     }
 }
