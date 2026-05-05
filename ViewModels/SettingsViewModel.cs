@@ -15,6 +15,7 @@ namespace LaboratorySitInSystem.ViewModels
 
         private int _alarmThreshold;
         private string _statusMessage;
+        private bool _isSaveSuccess;
 
         public int AlarmThreshold
         {
@@ -26,6 +27,12 @@ namespace LaboratorySitInSystem.ViewModels
         {
             get => _statusMessage;
             set => SetProperty(ref _statusMessage, value);
+        }
+
+        public bool IsSaveSuccess
+        {
+            get => _isSaveSuccess;
+            set => SetProperty(ref _isSaveSuccess, value);
         }
 
         public RelayCommand SaveCommand { get; }
@@ -43,8 +50,19 @@ namespace LaboratorySitInSystem.ViewModels
 
         private void LoadSettings()
         {
-            var settings = _settingsRepo.GetSettings();
-            AlarmThreshold = settings.AlarmThreshold;
+            try
+            {
+                var settings = _settingsRepo.GetSettings();
+                if (settings != null)
+                {
+                    AlarmThreshold = settings.AlarmThreshold;
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Failed to load settings: {ex.Message}";
+                IsSaveSuccess = false;
+            }
         }
 
         private void ExecuteSave(object parameter)

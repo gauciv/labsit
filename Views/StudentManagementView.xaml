@@ -16,7 +16,8 @@
 
         <!-- Header and Search -->
         <StackPanel Grid.Row="0" Margin="0,0,0,10">
-            <TextBlock Text="Student Management" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+            <TextBlock Text="Student Management" FontSize="18" FontWeight="Bold"
+                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
             <DockPanel Margin="0,0,0,10">
                 <Button Content="Search" Command="{Binding SearchCommand}" DockPanel.Dock="Right"
                         Padding="12,4" Margin="4,0,0,0"/>
@@ -157,7 +158,8 @@
                 <Button Content="Clear" Command="{Binding ClearFormCommand}" Padding="12,4"/>
             </StackPanel>
 
-            <TextBlock Text="{Binding StatusMessage}" Margin="0,4,0,0" FontStyle="Italic"/>
+            <TextBlock Text="{Binding StatusMessage}" Margin="0,4,0,0" FontStyle="Italic"
+                       Foreground="{StaticResource TextSecondaryBrush}"/>
         </StackPanel>
     </Grid>
 </UserControl>

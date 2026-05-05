@@ -43,6 +43,7 @@
     <Compile Include="..\ViewModels\SitInHistoryViewModel.cs" Link="ViewModels\SitInHistoryViewModel.cs" />
     <Compile Include="..\ViewModels\SettingsViewModel.cs" Link="ViewModels\SettingsViewModel.cs" />
     <Compile Include="..\ViewModels\AboutViewModel.cs" Link="ViewModels\AboutViewModel.cs" />
+    <Compile Include="..\Models\TeamMember.cs" Link="Models\TeamMember.cs" />
   </ItemGroup>
 
 </Project>
